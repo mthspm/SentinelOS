@@ -26,7 +26,6 @@ namespace SentinelOS.Resources
             { "cat", (string arg) => PrintFileContent(arg) },
             { "echo", (string arg) => Echo(arg) },
             { "help", (string arg) => ConsoleHelp(arg) },
-            { "gui", (string arg) => StartGUI() },
             { "pwd", (string arg) => PrintWorkingDirectory() }
         };
 
@@ -72,12 +71,6 @@ namespace SentinelOS.Resources
             {
                 Console.WriteLine("Command not found.");
             }
-        }
-
-        private static void StartGUI()
-        {
-            var ui = new UserInterface();
-            ui.StartGUI();
         }
 
         private static void ListDirectory()

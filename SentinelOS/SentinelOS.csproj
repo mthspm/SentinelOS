@@ -22,6 +22,10 @@
     <ItemGroup>
       <None Remove="Dependencies\canvas.bmp" />
       <None Remove="Dependencies\cursor.bmp" />
+      <None Remove="Dependencies\file.bmp" />
+      <None Remove="Dependencies\folder.bmp" />
+      <None Remove="Dependencies\network.bmp" />
+      <None Remove="Dependencies\osicon.bmp" />
       <None Remove="Dependencies\test.bmp" />
       <None Remove="Resources\FileManager.cs~RF563ca1ad.TMP" />
     </ItemGroup>
@@ -29,6 +33,10 @@
     <ItemGroup>
       <EmbeddedResource Include="Dependencies\canvas.bmp" />
       <EmbeddedResource Include="Dependencies\cursor.bmp" />
+      <EmbeddedResource Include="Dependencies\file.bmp" />
+      <EmbeddedResource Include="Dependencies\folder.bmp" />
+      <EmbeddedResource Include="Dependencies\network.bmp" />
+      <EmbeddedResource Include="Dependencies\osicon.bmp" />
       <EmbeddedResource Include="Dependencies\test.bmp" />
     </ItemGroup>
 
