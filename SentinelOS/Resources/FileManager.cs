@@ -16,11 +16,23 @@ namespace SentinelOS.Resources
         public static void CreateFile(string name, string content)
         {
             string path = DirectoryManager.CurrentPath + @"\" + name;
-
             try
             {
                 File.Create(path);
                 File.WriteAllText(path, content);
+                Console.WriteLine("File created with success");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
+
+        public static void CreateEmptyFile(string name) {
+            string path = DirectoryManager.CurrentPath + @"\" + name;
+            try
+            {
+                File.Create(path);
                 Console.WriteLine("File created with success");
             }
             catch (Exception e)
@@ -47,7 +59,6 @@ namespace SentinelOS.Resources
         public static void DeleteFile(string name)
         {
             string path = DirectoryManager.CurrentPath + @"\" + name;
-
             try
             {
                 File.Delete(path);
