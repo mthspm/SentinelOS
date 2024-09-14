@@ -41,7 +41,6 @@ namespace SentinelOS
             MouseManager.Y = 720 / 2;
 
             userInterface = new UserInterface(canvas);
-            userInterface.Initialize();
 
             Console.WriteLine("SentinelOS has booted successfully!");
             Console.WriteLine("Type 'help' for a list of commands.");

@@ -20,6 +20,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <None Remove="Dependencies\background.bmp" />
       <None Remove="Dependencies\canvas.bmp" />
       <None Remove="Dependencies\cursor.bmp" />
       <None Remove="Dependencies\file.bmp" />
@@ -31,6 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <EmbeddedResource Include="Dependencies\background.bmp" />
       <EmbeddedResource Include="Dependencies\canvas.bmp" />
       <EmbeddedResource Include="Dependencies\cursor.bmp" />
       <EmbeddedResource Include="Dependencies\file.bmp" />

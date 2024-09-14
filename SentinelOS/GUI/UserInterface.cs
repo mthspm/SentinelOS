@@ -17,6 +17,9 @@ using SentinelOS.Resources;
 
 namespace SentinelOS.GUI
 {
+    /// <summary>
+    /// Represents the User Interface of the SentinelOS
+    /// </summary>
     class UserInterface
     {
         private Canvas canvas;
@@ -25,52 +28,53 @@ namespace SentinelOS.GUI
         private int contextMenuY = 0;
         private int highlightedIndex = -1;
         private WindowManager windowManager;
-        private List<DirectoryEntry> directoryContents;
+        private List<DirectoryEntry> directoryContent;
 
-        // Resources Setup
+        /// Bitmaps Loading
         [ManifestResourceStream(ResourceName = "SentinelOS.Dependencies.cursor.bmp")] private static byte[] cursor;
         [ManifestResourceStream(ResourceName = "SentinelOS.Dependencies.osicon.bmp")] private static byte[] osIcon;
         [ManifestResourceStream(ResourceName = "SentinelOS.Dependencies.file.bmp")] private static byte[] file;
         [ManifestResourceStream(ResourceName = "SentinelOS.Dependencies.folder.bmp")] private static byte[] folder;
         [ManifestResourceStream(ResourceName = "SentinelOS.Dependencies.network.bmp")] private static byte[] network;
+        [ManifestResourceStream(ResourceName = "SentinelOS.Dependencies.background.bmp")] private static byte[] background;
         public static Bitmap cursorBitmap = new Bitmap(cursor);
         public static Bitmap osIconBitmap = new Bitmap(osIcon);
         public static Bitmap fileBitmap = new Bitmap(file);
         public static Bitmap folderBitmap = new Bitmap(folder);
         public static Bitmap networkBitmap = new Bitmap(network);
+        public static Bitmap backgroundBitmap = new Bitmap(background);
 
-        // Public Constructor for the GUI
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserInterface"/> class.
+        /// </summary>
         public UserInterface(Canvas canvas)
         {
             this.canvas = canvas;
             this.windowManager = new WindowManager(canvas);
-        }
+            this.directoryContent = VFSManager.GetDirectoryListing(DirectoryManager.CurrentPath);
 
-        public void Initialize()
-        {
-            directoryContents = VFSManager.GetDirectoryListing(DirectoryManager.CurrentPath);
         }
 
         public void DrawUserInterface()
         {
             canvas.Clear(Color.Aqua);
+            DrawBackground();
             DrawTaskbar();
             DrawHourAndDate();
-            DrawDirectoryContents(directoryContents);
+            DrawDesktopContents();
+            HandleMouseHover();
             windowManager.Run();
-            if (showContextMenu)
-            {
-                int relativeY = (int)MouseManager.Y - contextMenuY;
-                int highlightedOption = relativeY / 20;
-                DrawContextMenu(contextMenuX, contextMenuY, highlightedOption);
-            }
+            HandleContextMenu();
             DrawCursor((int)MouseManager.X, (int)MouseManager.Y);
+        }
+
+        public void DrawBackground()
+        {
+            canvas.DrawImage(backgroundBitmap, 0, 0);
         }
 
         public void HandleMouseInput()
         {
-            HandleMouseHover();
-
             if (MouseManager.MouseState == MouseState.Right && MouseManager.Y < 690) // Outside the taskbar
             {
                 showContextMenu = true;
@@ -84,36 +88,33 @@ namespace SentinelOS.GUI
                 {
                     HandleContextMenuSelection((int)MouseManager.X, (int)MouseManager.Y);
                 }
-                else
+                if(highlightedIndex != -1)
                 {
-                    showContextMenu = false;
                     HandleSysFileExecution();
                 }
+                showContextMenu = false;
             }
         }
 
         private void HandleSysFileExecution()
         {
-            if (highlightedIndex != -1)
+            var selectedItem = directoryContent[highlightedIndex];
+            if (selectedItem.mEntryType == DirectoryEntryTypeEnum.Directory)
             {
-                var selectedItem = directoryContents[highlightedIndex];
-                if (selectedItem.mEntryType == DirectoryEntryTypeEnum.Directory)
-                {
-                    DirectoryManager.CurrentPath = selectedItem.mFullPath;
-                    Refresh();
-                }
-                else if (selectedItem.mEntryType == DirectoryEntryTypeEnum.File)
-                {
-                    var notepad = new Notepad(canvas, 100, 100, 600, 400);
-                    notepad.Initialize(selectedItem.mFullPath);
-                    windowManager.AddWindow(notepad);
-                }
+                DirectoryManager.CurrentPath = selectedItem.mFullPath;
+                Refresh();
+            }
+            else if (selectedItem.mEntryType == DirectoryEntryTypeEnum.File)
+            {
+                var notepad = new Notepad(canvas, 100, 100, 600, 400, "Notepad");
+                notepad.Initialize(selectedItem.mFullPath);
+                windowManager.AddWindow(notepad);
             }
         }
 
-        private void HandleCreateItem(Action<string> createAction)
+        private void HandleCreateItem(Action<string> createAction, string name)
         {
-            string itemName = HandleFileNomination();
+            string itemName = HandleFileNomination(name);
             if (itemName != null)
             {
                 createAction(itemName);
@@ -121,9 +122,9 @@ namespace SentinelOS.GUI
             }
         }
 
-        private string HandleFileNomination()
+        private string HandleFileNomination(string nameBase)
         {
-            string fileName = "NewFile";
+            string fileName = nameBase;
             bool isNaming = true;
 
             while (isNaming)
@@ -152,7 +153,7 @@ namespace SentinelOS.GUI
 
         private void Refresh()
         {
-            directoryContents = VFSManager.GetDirectoryListing(DirectoryManager.CurrentPath);
+            directoryContent = VFSManager.GetDirectoryListing(DirectoryManager.CurrentPath);
             DrawUserInterface();
         }
 
@@ -172,7 +173,7 @@ namespace SentinelOS.GUI
             int startY = 50;
             highlightedIndex = -1;
 
-            for (int i = 0; i < directoryContents.Count; i++)
+            for (int i = 0; i < directoryContent.Count; i++)
             {
                 if (MouseManager.X >= 50 && MouseManager.X <= 300 && MouseManager.Y >= startY && MouseManager.Y <= startY + 30)
                 {
@@ -197,6 +198,8 @@ namespace SentinelOS.GUI
             canvas.DrawString(hour + ":" + minute + ":" + second, PCScreenFont.Default, pen, 1200, 690);
             canvas.DrawString(day + "/" + month + "/" + year, PCScreenFont.Default, pen, 1200, 705);
         }
+
+        // Context Menu
 
         public void DrawContextMenu(int x, int y, int highlightedOption)
         {
@@ -232,10 +235,12 @@ namespace SentinelOS.GUI
                 switch (optionIndex)
                 {
                     case 0:
-                        HandleCreateItem(DirectoryManager.CreateDir);
+                        var folderName = "New Folder";
+                        HandleCreateItem(DirectoryManager.CreateDir, folderName);
                         break;
                     case 1:
-                        HandleCreateItem(FileManager.CreateEmptyFile);
+                        var fileName = "New File";
+                        HandleCreateItem(FileManager.CreateEmptyFile, fileName);
                         break;
                     case 2:
                         Refresh();
@@ -246,6 +251,17 @@ namespace SentinelOS.GUI
             }
         }
 
+        private void HandleContextMenu()
+        {
+            if (showContextMenu)
+            {
+                int relativeY = (int)MouseManager.Y - contextMenuY;
+                int highlightedOption = relativeY / 20;
+                DrawContextMenu(contextMenuX, contextMenuY, highlightedOption);
+            }
+        }
+
+        // Nomination Window for creating files and folders
         public void DrawNominationWindow(string fileName)
         {
             int windowWidth = 300;
@@ -263,16 +279,27 @@ namespace SentinelOS.GUI
             canvas.Display();
         }
 
-        public void DrawDirectoryContents(List<DirectoryEntry> directoryContents)
+        // Draw files and folders in the desktop
+        public void DrawDesktopContents()
         {
             int startY = 50;
-            for (int i = 0; i < directoryContents.Count; i++)
+            int startX = 30;
+
+            for (int i = 0; i < directoryContent.Count; i++)
             {
-                var item = directoryContents[i];
-                Pen textPen = (i == highlightedIndex) ? new Pen(Color.White) : new Pen(Color.LightBlue);
-                canvas.DrawString(item.mFullPath, PCScreenFont.Default, textPen, 50, startY);
-                //TODO : Draw sysFiles icons
+                var item = directoryContent[i];
+                Pen textPen;
+
+                textPen = (i == highlightedIndex) ? new Pen(Color.MediumPurple) : new Pen(Color.White);
+
+                canvas.DrawString(item.mFullPath, PCScreenFont.Default, textPen, startX, startY);
+                //TODO : Draw Icons
                 startY += 30;
+                if (startY >= 690)
+                {
+                    startY = 50;
+                    startX += 300;
+                }
             }
         }
     }

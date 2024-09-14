@@ -1,4 +1,4 @@
-using Cosmos.System.Graphics;
+﻿using Cosmos.System.Graphics;
 using System;
 using System.Drawing;
 using Cosmos.System.Graphics.Fonts;
@@ -18,8 +18,8 @@ namespace SentinelOS.GUI
         private int cursorY;
         private string filePath;
 
-        public Notepad(Canvas canvas, int x, int y, int width, int height)
-            : base(canvas, x, y, width, height)
+        public Notepad(Canvas canvas, int x, int y, int width, int height, string name)
+            : base(canvas, x, y, width, height, name)
         {
             this.textContent = new List<string> { string.Empty };
             this.cursorX = 0;
@@ -147,6 +147,11 @@ namespace SentinelOS.GUI
             }
         }
 
+        public override void HandleMouseInput()
+        {
+            HandleEssentialMouseInput();
+        }
+
         private void SaveFile()
         {
             FileManager.WriteLinesToFile(filePath, textContent);
@@ -158,6 +163,7 @@ namespace SentinelOS.GUI
             {
                 canvas.DrawFilledRectangle(new Pen(Color.White), windowX, windowY, windowWidth, windowHeight);
                 canvas.DrawRectangle(new Pen(Color.Black), windowX, windowY, windowWidth, windowHeight);
+                DrawTitleBar();
 
                 for (int i = 0; i < textContent.Count; i++)
                 {

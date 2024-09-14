@@ -30,6 +30,7 @@ namespace SentinelOS.GUI
                 if (window.IsRunning)
                 {
                     window.Draw();
+                    window.HandleMouseInput();
                     if (Console.KeyAvailable)
                     {
                         var keyInfo = Console.ReadKey(true);
