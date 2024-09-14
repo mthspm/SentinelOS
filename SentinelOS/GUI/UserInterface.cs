@@ -24,7 +24,7 @@ namespace SentinelOS.GUI
         private int contextMenuX = 0;
         private int contextMenuY = 0;
         private int highlightedIndex = -1;
-        private Notepad notepad;
+        private WindowManager windowManager;
         private List<DirectoryEntry> directoryContents;
 
         // Resources Setup
@@ -43,7 +43,7 @@ namespace SentinelOS.GUI
         public UserInterface(Canvas canvas)
         {
             this.canvas = canvas;
-            this.notepad = new Notepad(canvas);
+            this.windowManager = new WindowManager(canvas);
         }
 
         public void Initialize()
@@ -57,6 +57,7 @@ namespace SentinelOS.GUI
             DrawTaskbar();
             DrawHourAndDate();
             DrawDirectoryContents(directoryContents);
+            windowManager.Run();
             if (showContextMenu)
             {
                 int relativeY = (int)MouseManager.Y - contextMenuY;
@@ -103,8 +104,10 @@ namespace SentinelOS.GUI
                 }
                 else if (selectedItem.mEntryType == DirectoryEntryTypeEnum.File)
                 {
+                    var notepad = new Notepad(canvas, 100, 100, 600, 400);
                     notepad.Initialize(selectedItem.mFullPath);
-                } 
+                    windowManager.AddWindow(notepad);
+                }
             }
         }
 

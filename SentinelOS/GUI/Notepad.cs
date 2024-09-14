@@ -4,115 +4,143 @@ using System.Drawing;
 using Cosmos.System.Graphics.Fonts;
 using System.IO;
 using Cosmos.System.FileSystem.VFS;
+using System.Collections.Generic;
+using System.Linq;
+using Cosmos.Core;
 
 namespace SentinelOS.GUI
 {
-    public class Notepad
+    public class Notepad : Window
     {
-        private Canvas canvas;
-        private string textContent;
+        private List<string> textContent;
         private int cursorX;
         private int cursorY;
-        private int windowX;
-        private int windowY;
-        private int windowWidth;
-        private int windowHeight;
-        private bool isRunning;
         private string filePath;
 
-        public Notepad(Canvas canvas)
+        public Notepad(Canvas canvas, int x, int y, int width, int height)
+            : base(canvas, x, y, width, height)
         {
-            this.canvas = canvas;
-            this.textContent = string.Empty;
-            this.cursorX = 10;
-            this.cursorY = 30;
-            this.windowX = 100;
-            this.windowY = 100;
-            this.windowWidth = 600;
-            this.windowHeight = 400;
-            this.isRunning = false;
+            this.textContent = new List<string> { string.Empty };
+            this.cursorX = 0;
+            this.cursorY = 0;
             this.filePath = string.Empty;
         }
 
-        // TODO: add a option to create a new file if the path doesn't exist
-        public void Initialize(string path) 
+        public override void Initialize()
         {
-            if (VFSManager.FileExists(path))
-            {
-                textContent = File.ReadAllText(path);
-                filePath = path;
-            }
             isRunning = true;
-            DrawNotepadWindow();
         }
 
-        public void HandleKeyPress(ConsoleKeyInfo keyInfo)
+        public override void Initialize(string path)
+        {
+            try
+            {
+                if (VFSManager.FileExists(path))
+                {
+                    textContent = File.ReadAllLines(path).ToList();
+                }
+                else
+                {
+                    textContent = new List<string> { string.Empty };
+                    File.WriteAllLines(path, textContent);
+                }
+                filePath = path;
+                SetCursorToEnd();
+                isRunning = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao inicializar o Notepad: {ex.Message}");
+                isRunning = false;
+            }
+        }
+
+        private void SetCursorToEnd()
+        {
+            if (textContent.Count > 0)
+            {
+                cursorY = textContent.Count - 1;
+                cursorX = textContent[cursorY].Length;
+            }
+            else
+            {
+                cursorX = 0;
+                cursorY = 0;
+                textContent.Add(string.Empty);
+            }
+        }
+
+        public override void HandleKeyPress(ConsoleKeyInfo keyInfo)
         {
             switch (keyInfo.Key)
             {
                 case ConsoleKey.Enter:
-                    textContent += "\n";
-                    cursorY += 20;
-                    cursorX = 10;
+                    string newLine = textContent[cursorY].Substring(cursorX);
+                    textContent[cursorY] = textContent[cursorY].Substring(0, cursorX);
+                    textContent.Insert(cursorY + 1, newLine);
+                    cursorY++;
+                    cursorX = 0;
                     break;
                 case ConsoleKey.Backspace:
-                    if (textContent.Length > 0)
+                    if (cursorX > 0)
                     {
-                        textContent = textContent.Substring(0, textContent.Length - 1);
-                        cursorX -= 10;
-                        if (cursorX < 10)
-                        {
-                            cursorX = windowWidth - 20;
-                            cursorY -= 20;
-                        }
+                        textContent[cursorY] = textContent[cursorY].Remove(cursorX - 1, 1);
+                        cursorX--;
+                    }
+                    else if (cursorY > 0)
+                    {
+                        string currentLine = textContent[cursorY];
+                        cursorY--;
+                        cursorX = textContent[cursorY].Length;
+                        textContent[cursorY] += currentLine;
+                        textContent.RemoveAt(cursorY + 1);
                     }
                     break;
                 case ConsoleKey.LeftArrow:
-                    cursorX -= 10;
-                    if (cursorX < 10)
-                    {
-                        cursorX = windowWidth - 20;
-                        cursorY -= 20;
-                    }
-                    break;
                 case ConsoleKey.RightArrow:
-                    cursorX += 10;
-                    if (cursorX > windowWidth - 20)
-                    {
-                        cursorX = 10;
-                        cursorY += 20;
-                    }
-                    break;
                 case ConsoleKey.UpArrow:
-                    cursorY -= 20;
-                    if (cursorY < 30)
-                    {
-                        cursorY = 30;
-                    }
-                    break;
                 case ConsoleKey.DownArrow:
-                    cursorY += 20;
-                    if (cursorY > windowHeight - 30)
-                    {
-                        cursorY = windowHeight - 30;
-                    }
+                    HandleCursorMovement(keyInfo);
                     break;
                 case ConsoleKey.S when keyInfo.Modifiers == ConsoleModifiers.Control:
                     SaveFile();
                     break;
                 case ConsoleKey.X when keyInfo.Modifiers == ConsoleModifiers.Control:
-                    isRunning = false;
-                    break;
                 case ConsoleKey.Escape:
                     isRunning = false;
                     break;
                 default:
-                    textContent += keyInfo.KeyChar;
-                    cursorX += 10;
-                    if (cursorX > windowWidth - 20)
+                    if (!char.IsControl(keyInfo.KeyChar))
                     {
-                        cursorX = 10;
-                        cursorY += 20;
+                        textContent[cursorY] = textContent[cursorY].Insert(cursorX, keyInfo.KeyChar.ToString());
+                        cursorX++;
+                    }
+                    break;
+            }
+        }
+
+        private void HandleCursorMovement(ConsoleKeyInfo keyInfo)
+        {
+            switch (keyInfo.Key)
+            {
+                case ConsoleKey.LeftArrow:
+                    if (cursorX > 0) cursorX--;
+                    break;
+                case ConsoleKey.RightArrow:
+                    if (cursorX < textContent[cursorY].Length) cursorX++;
+                    break;
+                case ConsoleKey.UpArrow:
+                    if (cursorY > 0)
+                    {
+                        cursorY--;
+                        cursorX = Math.Min(textContent[cursorY].Length, cursorX);
+                    }
+                    break;
+                case ConsoleKey.DownArrow:
+                    if (cursorY < textContent.Count - 1)
+                    {
+                        cursorY++;
+                        cursorX = Math.Min(textContent[cursorY].Length, cursorX);
                     }
                     break;
             }
@@ -120,33 +148,45 @@ namespace SentinelOS.GUI
 
         private void SaveFile()
         {
-            if (!string.IsNullOrEmpty(filePath))
+            try
             {
-                File.WriteAllText(filePath, textContent);
+                using (StreamWriter writer = new StreamWriter(filePath))
+                {
+                    foreach (string line in textContent)
+                    {
+                        writer.WriteLine(line);
+                    }
+                }
+                Console.WriteLine("\nFile saved with success at " + filePath);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
         }
 
-        private void DrawNotepadWindow()
+        public override void Draw()
         {
-            while (isRunning)
+            if (isRunning)
             {
                 canvas.DrawFilledRectangle(new Pen(Color.White), windowX, windowY, windowWidth, windowHeight);
                 canvas.DrawRectangle(new Pen(Color.Black), windowX, windowY, windowWidth, windowHeight);
-                canvas.DrawString(textContent, PCScreenFont.Default, new Pen(Color.Black), windowX + 10, windowY + 10);
+
+                for (int i = 0; i < textContent.Count; i++)
+                {
+                    canvas.DrawString(textContent[i], PCScreenFont.Default, new Pen(Color.Black), windowX + 10, windowY + 10 + i * 20);
+                }
+
                 DrawCursor();
                 canvas.Display();
-
-                if (Console.KeyAvailable)
-                {
-                    var keyInfo = Console.ReadKey(true);
-                    HandleKeyPress(keyInfo);
-                }
             }
         }
 
         private void DrawCursor()
         {
-            canvas.DrawLine(new Pen(Color.Black), windowX + cursorX, windowY + cursorY, windowX + cursorX, windowY + cursorY + 20);
+            int cursorPosX = windowX + 10 + cursorX * 8;
+            int cursorPosY = windowY + 10 + cursorY * 20;
+            canvas.DrawFilledRectangle(new Pen(Color.Black), cursorPosX, cursorPosY, 2, 16);
         }
     }
 }
