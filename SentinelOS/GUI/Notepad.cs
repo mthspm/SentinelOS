@@ -7,6 +7,7 @@ using Cosmos.System.FileSystem.VFS;
 using System.Collections.Generic;
 using System.Linq;
 using Cosmos.Core;
+using SentinelOS.Resources;
 
 namespace SentinelOS.GUI
 {
@@ -148,21 +149,7 @@ namespace SentinelOS.GUI
 
         private void SaveFile()
         {
-            try
-            {
-                using (StreamWriter writer = new StreamWriter(filePath))
-                {
-                    foreach (string line in textContent)
-                    {
-                        writer.WriteLine(line);
-                    }
-                }
-                Console.WriteLine("\nFile saved with success at " + filePath);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            FileManager.WriteLinesToFile(filePath, textContent);
         }
 
         public override void Draw()

@@ -28,6 +28,25 @@ namespace SentinelOS.Resources
             }
         }
 
+        public static void WriteLinesToFile(string fullpath, List<string> lines)
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(fullpath))
+                {
+                    foreach (string line in lines)
+                    {
+                        writer.WriteLine(line);
+                    }
+                }
+                Console.WriteLine("\nFile saved with success at " + fullpath);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
         public static void CreateEmptyFile(string name) {
             string path = DirectoryManager.CurrentPath + @"\" + name;
             try
