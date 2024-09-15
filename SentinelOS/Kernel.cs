@@ -42,14 +42,19 @@ namespace SentinelOS
 
             userInterface = new UserInterface(canvas);
 
+            // Add tasks to the task manager
+            // Example with a method that have arguments
+            // taskManager.AddTask("ExampleTaskWithParameters", 0, new Action<int, string>(ExampleTaskWithParameters), 42, "Hello");
+            TaskManager.AddTask("DrawUserInterface", 0, new Action(userInterface.DrawUserInterface));
+            TaskManager.AddTask("HandleMouseInput", 0, new Action(userInterface.HandleMouseInput));
+
             Console.WriteLine("SentinelOS has booted successfully!");
             Console.WriteLine("Type 'help' for a list of commands.");
         }
 
         protected override void Run()
         {
-            userInterface.DrawUserInterface();
-            userInterface.HandleMouseInput();
+            TaskManager.ExecuteAllTasks();
             Heap.Collect();
             canvas.Display();
         }
