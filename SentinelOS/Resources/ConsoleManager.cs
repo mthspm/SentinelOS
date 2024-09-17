@@ -17,7 +17,7 @@ namespace SentinelOS.Resources
             { "ls", (string arg) => ListDirectory() },
             { "cd", (string arg) => ChangeDirectory(arg) },
             { "mkdir", (string arg) => MakeDirectory(arg) },
-            { "cldir", (string arg) => DirectoryManager.ClearDir() },
+            { "cldir", (string arg) => DirectoryManager.ClearDir(true) },
             { "rmdir", (string arg) => RemoveDirectory(arg) },
             { "nano", (string arg) => Nano.Main(arg) },
             { "touch", (string arg) => CreateFile(arg) },

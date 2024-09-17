@@ -7,8 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Cosmos.System.FileSystem.Listing;
 using System.IO;
-using SentinelOS.Resources;
-using SentinelOS;
 using System.Xml.Linq;
 using System.IO.Enumeration;
 
@@ -16,14 +14,14 @@ namespace SentinelOS.Resources
 {
     class DirectoryManager
     {
-        public static string CurrentPath { get; set; } = Config.Root;
+        public static string CurrentPath { get; set; } = Paths.Root;
 
         private static List<string> defaultDirectories = new List<string>
             {
-                Config.Temp,
-                Config.Root,
-                Config.User,
-                Config.Desktop,
+                Paths.Temp,
+                Paths.Root,
+                Paths.User,
+                Paths.Desktop,
             };
 
         public static void CreateSystemFiles()
@@ -37,6 +35,7 @@ namespace SentinelOS.Resources
                     VFSManager.CreateDirectory(dir);
                 }
             }
+            CurrentPath = Paths.Desktop;
         }
 
         public static void CreateDir(string name)
@@ -106,7 +105,7 @@ namespace SentinelOS.Resources
             }
             else if (name == "..")
             {
-                if (CurrentPath != Config.Root)
+                if (CurrentPath != Paths.Root)
                 {
                     CurrentPath = CurrentPath.Remove(CurrentPath.LastIndexOf(@"\"));
                 }
@@ -116,8 +115,11 @@ namespace SentinelOS.Resources
                 Console.WriteLine("Directory not found");
             }
         }
-
-        public static void ClearDir()
+        /// <summary>
+        /// Clear the current directory
+        /// </summary>
+        /// <param name="recursive"> `true` to clear all subdirectories and files ; `false` to clear only files</param>
+        public static void ClearDir(bool recursive)
         {
             // Get all files and directories in the current directory
             var directoryListing = VFSManager.GetDirectoryListing(CurrentPath);
@@ -127,7 +129,7 @@ namespace SentinelOS.Resources
                 {
                     if (entry.mEntryType == DirectoryEntryTypeEnum.Directory)
                     {
-                        Directory.Delete(entry.mFullPath, true);
+                        Directory.Delete(entry.mFullPath, recursive);
                     }
                     else
                     {
@@ -144,7 +146,7 @@ namespace SentinelOS.Resources
 
         public static bool IsValidSystemPath(string path)
         {
-            return path.StartsWith(Config.Root, StringComparison.OrdinalIgnoreCase);
+            return path.StartsWith(Paths.Root, StringComparison.OrdinalIgnoreCase);
         }
 
     }

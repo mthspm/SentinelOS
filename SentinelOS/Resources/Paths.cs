@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SentinelOS
+namespace SentinelOS.Resources
 {
-    internal class Config
+    internal class Paths
     {
-        public const string OSName = "SentinelOS";
-        public const string OSVersion = "0.0.1";
         public const string Root = @"0:\Disk";
         public const string User = @"0:\Disk\User";
         public const string System = @"0:\Disk\System";
