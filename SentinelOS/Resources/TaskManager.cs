@@ -86,18 +86,43 @@ namespace SentinelOS.Resources
         Suspended
     }
 
+    public enum TaskType
+    {
+        System,
+        User
+    }
+
     public static class TaskManager
     {
         private static List<OSTask> tasks = new List<OSTask>();
         private static int nextPID = 1;
 
+        /// <summary>
+        /// Add tasks to the task manager to be executed.
+        /// This method is used when the task has no parameters
+        /// <para>TaskManager.AddTask("TaskName", 0, () => { Console.WriteLine("Hello World!"); });</para>
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="parentPID"></param>
+        /// <param name="taskAction"></param>
+        /// <returns></returns>
         public static OSTask AddTask(string name, int parentPID, Action taskAction)
         {
             var task = new OSTaskWithoutParams(name, nextPID++, parentPID, taskAction);
             tasks.Add(task);
             return task;
         }
-
+        /// <summary>
+        /// Add tasks to the task manager to be executed.
+        /// This method is used when the task has parameters
+        /// <para>TaskManager.AddTask("TaskName", 0, (string message) => { Console.WriteLine(message); }, "Hello World!");</para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="name"></param>
+        /// <param name="parentPID"></param>
+        /// <param name="taskAction"></param>
+        /// <param name="taskParameter"></param>
+        /// <returns></returns>
         public static OSTask<T> AddTask<T>(string name, int parentPID, Action<T> taskAction, T taskParameter)
         {
             var task = new OSTask<T>(name, nextPID++, parentPID, taskAction, taskParameter);
