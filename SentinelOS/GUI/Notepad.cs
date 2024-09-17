@@ -27,6 +27,8 @@ namespace SentinelOS.GUI
             this.filePath = string.Empty;
         }
 
+        // Used to initialize the Notepad without a pre-existing file
+        // Not implemented yet
         public override void Initialize()
         {
             isRunning = true;
@@ -71,52 +73,56 @@ namespace SentinelOS.GUI
             }
         }
 
-        public override void HandleKeyPress(ConsoleKeyInfo keyInfo)
+        public override void HandleKeyPress()
         {
-            switch (keyInfo.Key)
+            if (Console.KeyAvailable)
             {
-                case ConsoleKey.Enter:
-                    string newLine = textContent[cursorY].Substring(cursorX);
-                    textContent[cursorY] = textContent[cursorY].Substring(0, cursorX);
-                    textContent.Insert(cursorY + 1, newLine);
-                    cursorY++;
-                    cursorX = 0;
-                    break;
-                case ConsoleKey.Backspace:
-                    if (cursorX > 0)
-                    {
-                        textContent[cursorY] = textContent[cursorY].Remove(cursorX - 1, 1);
-                        cursorX--;
-                    }
-                    else if (cursorY > 0)
-                    {
-                        string currentLine = textContent[cursorY];
-                        cursorY--;
-                        cursorX = textContent[cursorY].Length;
-                        textContent[cursorY] += currentLine;
-                        textContent.RemoveAt(cursorY + 1);
-                    }
-                    break;
-                case ConsoleKey.LeftArrow:
-                case ConsoleKey.RightArrow:
-                case ConsoleKey.UpArrow:
-                case ConsoleKey.DownArrow:
-                    HandleCursorMovement(keyInfo);
-                    break;
-                case ConsoleKey.S when keyInfo.Modifiers == ConsoleModifiers.Control:
-                    SaveFile();
-                    break;
-                case ConsoleKey.X when keyInfo.Modifiers == ConsoleModifiers.Control:
-                case ConsoleKey.Escape:
-                    isRunning = false;
-                    break;
-                default:
-                    if (!char.IsControl(keyInfo.KeyChar))
-                    {
-                        textContent[cursorY] = textContent[cursorY].Insert(cursorX, keyInfo.KeyChar.ToString());
-                        cursorX++;
-                    }
-                    break;
+                var keyInfo = Console.ReadKey(true);
+                switch (keyInfo.Key)
+                {
+                    case ConsoleKey.Enter:
+                        string newLine = textContent[cursorY].Substring(cursorX);
+                        textContent[cursorY] = textContent[cursorY].Substring(0, cursorX);
+                        textContent.Insert(cursorY + 1, newLine);
+                        cursorY++;
+                        cursorX = 0;
+                        break;
+                    case ConsoleKey.Backspace:
+                        if (cursorX > 0)
+                        {
+                            textContent[cursorY] = textContent[cursorY].Remove(cursorX - 1, 1);
+                            cursorX--;
+                        }
+                        else if (cursorY > 0)
+                        {
+                            string currentLine = textContent[cursorY];
+                            cursorY--;
+                            cursorX = textContent[cursorY].Length;
+                            textContent[cursorY] += currentLine;
+                            textContent.RemoveAt(cursorY + 1);
+                        }
+                        break;
+                    case ConsoleKey.LeftArrow:
+                    case ConsoleKey.RightArrow:
+                    case ConsoleKey.UpArrow:
+                    case ConsoleKey.DownArrow:
+                        HandleCursorMovement(keyInfo);
+                        break;
+                    case ConsoleKey.S when keyInfo.Modifiers == ConsoleModifiers.Control:
+                        SaveFile();
+                        break;
+                    case ConsoleKey.X when keyInfo.Modifiers == ConsoleModifiers.Control:
+                    case ConsoleKey.Escape:
+                        isRunning = false;
+                        break;
+                    default:
+                        if (!char.IsControl(keyInfo.KeyChar))
+                        {
+                            textContent[cursorY] = textContent[cursorY].Insert(cursorX, keyInfo.KeyChar.ToString());
+                            cursorX++;
+                        }
+                        break;
+                }
             }
         }
 
@@ -161,18 +167,25 @@ namespace SentinelOS.GUI
         {
             if (isRunning)
             {
+                var penBlack = new Pen(Color.Black);
                 canvas.DrawFilledRectangle(new Pen(Color.White), windowX, windowY, windowWidth, windowHeight);
-                canvas.DrawRectangle(new Pen(Color.Black), windowX, windowY, windowWidth, windowHeight);
+                canvas.DrawRectangle(penBlack, windowX, windowY, windowWidth, windowHeight);
                 DrawTitleBar();
 
                 for (int i = 0; i < textContent.Count; i++)
                 {
-                    canvas.DrawString(textContent[i], PCScreenFont.Default, new Pen(Color.Black), windowX + 10, windowY + 10 + i * 20);
+                    canvas.DrawString(textContent[i], PCScreenFont.Default, penBlack, windowX + 10, windowY + 10 + i * 20);
                 }
 
                 DrawCursor();
-                canvas.Display();
             }
+        }
+
+        public override void Run()
+        {
+            Draw();
+            HandleMouseInput();
+            HandleKeyPress();
         }
 
         private void DrawCursor()
