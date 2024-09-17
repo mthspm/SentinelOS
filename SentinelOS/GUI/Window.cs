@@ -32,7 +32,9 @@ namespace SentinelOS.GUI
         private Rectangle minimizeButton;
         private Rectangle maximizeButton;
         private Rectangle closeButton;
-        
+
+        private const int MarginY = 30;
+        private const int MarginX = 10;
 
         public Window(Canvas canvas, int x, int y, int width, int height, string name)
         {
@@ -60,12 +62,13 @@ namespace SentinelOS.GUI
 
         public abstract void Initialize();
         public abstract void Initialize(string path);
-        public abstract void HandleKeyPress(ConsoleKeyInfo keyInfo);
+        public abstract void HandleKeyPress();
         /// <summary>
-        /// This method must call the <see cref="HandleEssentialMouseInput"/> in order to handle the essential mouse input for the window.
+        /// This method must call <see cref="HandleEssentialMouseInput"/> in order to handle the essential mouse input for the window.
         /// </summary>
         public abstract void HandleMouseInput();
         public abstract void Draw();
+        public abstract void Run();
         public bool IsRunning => isRunning;
 
         protected void DrawTitleBar()
@@ -77,7 +80,6 @@ namespace SentinelOS.GUI
             DrawButton(maximizeButton, Color.Black, isMaximized ? "❐" : "□");
             DrawButton(minimizeButton, Color.Black, "_");
         }
-
         /// <summary>
         /// This method should be called in the <see cref="HandleMouseInput"/> overried method of every new class that inherits from <see cref="Window"/>.
         /// It handles the essential mouse input for the window, such as closing the window, draging, minimizing it, etc.
@@ -123,9 +125,7 @@ namespace SentinelOS.GUI
                 DragWindow();
             }
         }
-
         //TODO: FIX MINIMIZE AND MAXIMIZE METHODS
-
         private void Minimize()
         {
             if (!isMinimized)
@@ -160,10 +160,10 @@ namespace SentinelOS.GUI
                 originalWidth = windowWidth;
                 originalHeight = windowHeight;
 
-                windowX = 0;
-                windowY = 0;
-                windowWidth = canvas.Mode.Columns;
-                windowHeight = canvas.Mode.Rows;
+                windowX = 50;
+                windowY = 50;
+                windowWidth = canvas.Mode.Columns - 200;
+                windowHeight = canvas.Mode.Rows - 200;
             }
             else
             {
@@ -180,7 +180,29 @@ namespace SentinelOS.GUI
             windowX = (int)MouseManager.X - dragOffsetX;
             windowY = (int)MouseManager.Y - dragOffsetY;
 
-            // Atualizar a posição dos botões
+            ClampToScreenBounds();
+        }
+
+        private void ClampToScreenBounds()
+        {
+            if (windowX < MarginX)
+            {
+                windowX = MarginX;
+            }
+            else if (windowX + windowWidth > canvas.Mode.Columns - MarginX)
+            {
+                windowX = canvas.Mode.Columns - windowWidth - MarginX;
+            }
+
+            if (windowY < MarginY)
+            {
+                windowY = MarginY;
+            }
+            else if (windowY + windowHeight > canvas.Mode.Rows - MarginY)
+            {
+                windowY = canvas.Mode.Rows - windowHeight - MarginY;
+            }
+
             closeButton.X = windowX + windowWidth - closeButton.Width - 5;
             closeButton.Y = windowY - 25 + 5;
             maximizeButton.X = closeButton.X - maximizeButton.Width - 5;

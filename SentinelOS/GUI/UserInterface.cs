@@ -1,19 +1,14 @@
 ﻿using Cosmos.System.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
-using IL2CPU.API.Attribs;
-using Cosmos.Core.Memory;
 using MouseManager = Cosmos.System.MouseManager;
 using MouseState = Cosmos.System.MouseState;
-using Cosmos.Core;
 using Cosmos.System.Graphics.Fonts;
 using Cosmos.System.FileSystem.Listing;
 using Cosmos.System.FileSystem.VFS;
 using SentinelOS.Resources;
+using System.Reflection.Emit;
 
 namespace SentinelOS.GUI
 {
@@ -27,22 +22,9 @@ namespace SentinelOS.GUI
         private int contextMenuX = 0;
         private int contextMenuY = 0;
         private int highlightedIndex = -1;
+        private StartMenu startMenu;
         private WindowManager windowManager;
         private List<DirectoryEntry> directoryContent;
-
-        /// Bitmaps Loading
-        [ManifestResourceStream(ResourceName = "SentinelOS.Dependencies.cursor.bmp")] private static byte[] cursor;
-        [ManifestResourceStream(ResourceName = "SentinelOS.Dependencies.osicon.bmp")] private static byte[] osIcon;
-        [ManifestResourceStream(ResourceName = "SentinelOS.Dependencies.file.bmp")] private static byte[] file;
-        [ManifestResourceStream(ResourceName = "SentinelOS.Dependencies.folder.bmp")] private static byte[] folder;
-        [ManifestResourceStream(ResourceName = "SentinelOS.Dependencies.network.bmp")] private static byte[] network;
-        [ManifestResourceStream(ResourceName = "SentinelOS.Dependencies.background.bmp")] private static byte[] background;
-        public static Bitmap cursorBitmap = new Bitmap(cursor);
-        public static Bitmap osIconBitmap = new Bitmap(osIcon);
-        public static Bitmap fileBitmap = new Bitmap(file);
-        public static Bitmap folderBitmap = new Bitmap(folder);
-        public static Bitmap networkBitmap = new Bitmap(network);
-        public static Bitmap backgroundBitmap = new Bitmap(background);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserInterface"/> class.
@@ -50,30 +32,37 @@ namespace SentinelOS.GUI
         public UserInterface(Canvas canvas)
         {
             this.canvas = canvas;
+            this.startMenu = new StartMenu(canvas);
             this.windowManager = new WindowManager(canvas);
             this.directoryContent = VFSManager.GetDirectoryListing(DirectoryManager.CurrentPath);
-
         }
 
-        public void DrawUserInterface()
+        private void DrawUserInterface()
         {
-            canvas.Clear(Color.Aqua);
+            //canvas.Clear(Color.Aqua);
             DrawBackground();
             DrawTaskbar();
             DrawHourAndDate();
             DrawDesktopContents();
             HandleMouseHover();
-            windowManager.Run();
             HandleContextMenu();
-            DrawCursor((int)MouseManager.X, (int)MouseManager.Y);
+            startMenu.HandleDrawStartMenu();
+            windowManager.Run();
+            DrawCursor((int)MouseManager.X, (int)MouseManager.Y); // Draw cursor at the end to be on top of everything
         }
 
-        public void DrawBackground()
+        public void Run()
         {
-            canvas.DrawImage(backgroundBitmap, 0, 0);
+            DrawUserInterface();
+            HandleMouseInput();
         }
 
-        public void HandleMouseInput()
+        private void DrawBackground()
+        {
+            canvas.DrawImage(Resources.backgroundBitmap, 0, 0);
+        }
+
+        private void HandleMouseInput()
         {
             if (MouseManager.MouseState == MouseState.Right && MouseManager.Y < 690) // Outside the taskbar
             {
@@ -94,6 +83,9 @@ namespace SentinelOS.GUI
                 }
                 showContextMenu = false;
             }
+
+            startMenu.HandleMouseInput();
+
         }
 
         private void HandleSysFileExecution()
@@ -126,28 +118,30 @@ namespace SentinelOS.GUI
         {
             string fileName = nameBase;
             bool isNaming = true;
-
-            while (isNaming)
-            {
-                DrawNominationWindow(fileName);
-
-                var keyInfo = Console.ReadKey(true);
-                switch (keyInfo)
+            NameInputHandler:
+                if (isNaming)
                 {
-                    case { Key: ConsoleKey.Enter }:
-                        isNaming = false;
-                        break;
-                    case { Key: ConsoleKey.Escape }:
-                        return null;
-                    case { Key: ConsoleKey.Backspace } when fileName.Length > 0:
-                        fileName = fileName.Substring(0, fileName.Length - 1);
-                        break;
-                    case { KeyChar: not '\0' }:
-                        fileName += keyInfo.KeyChar;
-                        break;
+                    DrawNominationWindow(fileName);
+                    var keyInfo = Console.ReadKey(true);
+                    switch (keyInfo)
+                    {
+                        case { Key: ConsoleKey.Enter }:
+                            isNaming = false;
+                            break;
+                        case { Key: ConsoleKey.Escape }:
+                            return null;
+                        case { Key: ConsoleKey.Backspace } when fileName.Length > 0:
+                            fileName = fileName.Substring(0, fileName.Length - 1);
+                            break;
+                        case { KeyChar: not '\0' }:
+                            fileName += keyInfo.KeyChar;
+                            break;
+                    }
+                    if (isNaming)
+                    {
+                    goto NameInputHandler;
+                    }
                 }
-            }
-
             return fileName;
         }
 
@@ -160,12 +154,12 @@ namespace SentinelOS.GUI
         public void DrawTaskbar()
         {
             canvas.DrawFilledRectangle(new Pen(Color.Black), 0, 690, 1280, 30);
-            canvas.DrawImage(osIconBitmap, 0, 690);
+            canvas.DrawImage(Resources.osIconBitmap, 0, 690);
         }
 
         public void DrawCursor(int x, int y)
         {
-            canvas.DrawImageAlpha(cursorBitmap, x, y);
+            canvas.DrawImageAlpha(Resources.cursorBitmap, x, y);
         }
 
         private void HandleMouseHover()
@@ -198,8 +192,6 @@ namespace SentinelOS.GUI
             canvas.DrawString(hour + ":" + minute + ":" + second, PCScreenFont.Default, pen, 1200, 690);
             canvas.DrawString(day + "/" + month + "/" + year, PCScreenFont.Default, pen, 1200, 705);
         }
-
-        // Context Menu
 
         public void DrawContextMenu(int x, int y, int highlightedOption)
         {
@@ -255,13 +247,24 @@ namespace SentinelOS.GUI
         {
             if (showContextMenu)
             {
-                int relativeY = (int)MouseManager.Y - contextMenuY;
-                int highlightedOption = relativeY / 20;
-                DrawContextMenu(contextMenuX, contextMenuY, highlightedOption);
+                int width = 150;
+                int optionHeight = 20;
+                int menuHeight = 3 * optionHeight;
+
+                if (MouseManager.X >= contextMenuX && MouseManager.X <= contextMenuX + width &&
+                    MouseManager.Y >= contextMenuY && MouseManager.Y <= contextMenuY + menuHeight)
+                {
+                    int relativeY = (int)MouseManager.Y - contextMenuY;
+                    int highlightedOption = relativeY / optionHeight;
+                    DrawContextMenu(contextMenuX, contextMenuY, highlightedOption);
+                }
+                else
+                {
+                    DrawContextMenu(contextMenuX, contextMenuY, -1);
+                }
             }
         }
 
-        // Nomination Window for creating files and folders
         public void DrawNominationWindow(string fileName)
         {
             int windowWidth = 300;
@@ -276,10 +279,9 @@ namespace SentinelOS.GUI
             canvas.DrawFilledRectangle(new Pen(Color.White), windowX + 10, windowY + 40, windowWidth - 20, 20);
             canvas.DrawString(fileName, PCScreenFont.Default, new Pen(Color.Black), windowX + 10, windowY + 40);
 
-            canvas.Display();
+            canvas.Display(); // NEED TO REMOVE THIS
         }
 
-        // Draw files and folders in the desktop
         public void DrawDesktopContents()
         {
             int startY = 50;

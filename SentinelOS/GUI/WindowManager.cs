@@ -23,19 +23,25 @@ namespace SentinelOS.GUI
             windows.Add(window);
         }
 
+        public void RemoveWindow(Window window) {
+            windows.Remove(window);
+        }
+
+        public void Clear() {
+            windows.Clear();
+        }
+
+        public List<Window> GetWindows() {
+            return windows;
+        }
+
         public void Run()
         {
-            foreach (var window in windows)
+            foreach (Window window in windows)
             {
                 if (window.IsRunning)
                 {
-                    window.Draw();
-                    window.HandleMouseInput();
-                    if (Console.KeyAvailable)
-                    {
-                        var keyInfo = Console.ReadKey(true);
-                        window.HandleKeyPress(keyInfo);
-                    }
+                    window.Run();
                 }
             }
         }
