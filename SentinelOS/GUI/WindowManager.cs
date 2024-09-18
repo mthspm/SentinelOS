@@ -39,7 +39,7 @@ namespace SentinelOS.GUI
         {
             foreach (Window window in windows)
             {
-                if (window.IsRunning)
+                if (window.GetWindowState() == WindowState.Running)
                 {
                     window.Run();
                 }

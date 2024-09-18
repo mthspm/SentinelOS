@@ -31,7 +31,7 @@ namespace SentinelOS.GUI
         // Not implemented yet
         public override void Initialize()
         {
-            isRunning = true;
+            windowState = WindowState.Running;
         }
 
         public override void Initialize(string path)
@@ -49,12 +49,12 @@ namespace SentinelOS.GUI
                 }
                 filePath = path;
                 SetCursorToEnd();
-                isRunning = true;
+                windowState = WindowState.Running;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro ao inicializar o Notepad: {ex.Message}");
-                isRunning = false;
+                windowState = WindowState.ToClose;
             }
         }
 
@@ -113,7 +113,7 @@ namespace SentinelOS.GUI
                         break;
                     case ConsoleKey.X when keyInfo.Modifiers == ConsoleModifiers.Control:
                     case ConsoleKey.Escape:
-                        isRunning = false;
+                        windowState = WindowState.ToClose;
                         break;
                     default:
                         if (!char.IsControl(keyInfo.KeyChar))
@@ -165,20 +165,17 @@ namespace SentinelOS.GUI
 
         public override void Draw()
         {
-            if (isRunning)
+            var penBlack = new Pen(Color.Black);
+            canvas.DrawFilledRectangle(new Pen(Color.White), windowX, windowY, windowWidth, windowHeight);
+            canvas.DrawRectangle(penBlack, windowX, windowY, windowWidth, windowHeight);
+            DrawTitleBar();
+
+            for (int i = 0; i < textContent.Count; i++)
             {
-                var penBlack = new Pen(Color.Black);
-                canvas.DrawFilledRectangle(new Pen(Color.White), windowX, windowY, windowWidth, windowHeight);
-                canvas.DrawRectangle(penBlack, windowX, windowY, windowWidth, windowHeight);
-                DrawTitleBar();
-
-                for (int i = 0; i < textContent.Count; i++)
-                {
-                    canvas.DrawString(textContent[i], PCScreenFont.Default, penBlack, windowX + 10, windowY + 10 + i * 20);
-                }
-
-                DrawCursor();
+                canvas.DrawString(textContent[i], PCScreenFont.Default, penBlack, windowX + 10, windowY + 10 + i * 20);
             }
+
+            DrawCursor();
         }
 
         public override void Run()
