@@ -104,63 +104,16 @@ namespace SentinelOS.GUI
             }
         }
 
-        //private void HandleCreateItem(Action<string> createAction, string name)
-        //{
-        //    string itemName = HandleFileNomination(name);
-        //    if (itemName != null)
-        //    {
-        //        createAction(itemName);
-        //        Refresh();
-        //    }
-        //}
-
-        private void HandleCreateItem(Action<string> createAction, string name)
+        private void HandleCreateItem(Action<string> createAction, string defaultName)
         {
-            var nominationWindow = new NominationWindow(canvas, 100, 100, 300, 100, "NominationWindow", name, (itemName) =>
-            {
-                createAction(itemName);
-                Refresh();
-            });
-
+            var nominationWindow = new NominationWindow(canvas, 100, 100, 300, 100, "NominationWindow", defaultName, createAction);
             windowManager.AddWindow(nominationWindow);
             nominationWindow.Initialize();
-        }
-
-        private string HandleFileNomination(string nameBase)
-        {
-            string fileName = nameBase;
-            bool isNaming = true;
-            NameInputHandler:
-                if (isNaming)
-                {
-                    DrawNominationWindow(fileName);
-                    var keyInfo = Console.ReadKey(true);
-                    switch (keyInfo)
-                    {
-                        case { Key: ConsoleKey.Enter }:
-                            isNaming = false;
-                            break;
-                        case { Key: ConsoleKey.Escape }:
-                            return null;
-                        case { Key: ConsoleKey.Backspace } when fileName.Length > 0:
-                            fileName = fileName.Substring(0, fileName.Length - 1);
-                            break;
-                        case { KeyChar: not '\0' }:
-                            fileName += keyInfo.KeyChar;
-                            break;
-                    }
-                    if (isNaming)
-                    {
-                    goto NameInputHandler;
-                    }
-                }
-            return fileName;
         }
 
         private void Refresh()
         {
             directoryContent = VFSManager.GetDirectoryListing(DirectoryManager.CurrentPath);
-            DrawUserInterface();
         }
 
         public void DrawTaskbar()
@@ -239,12 +192,10 @@ namespace SentinelOS.GUI
                 switch (optionIndex)
                 {
                     case 0:
-                        var folderName = "New Folder";
-                        HandleCreateItem(DirectoryManager.CreateDir, folderName);
+                        HandleCreateItem(DirectoryManager.CreateDir, "New Folder");
                         break;
                     case 1:
-                        var fileName = "New File";
-                        HandleCreateItem(FileManager.CreateEmptyFile, fileName);
+                        HandleCreateItem(FileManager.CreateEmptyFile, "New File");
                         break;
                     case 2:
                         Refresh();

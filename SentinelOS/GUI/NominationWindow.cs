@@ -9,13 +9,13 @@ namespace SentinelOS.GUI
     public class NominationWindow : Window
     {
         private string fileName;
-        private Action<string> onNameEntered;
+        private Action<string> createAction;
 
-        public NominationWindow(Canvas canvas, int x, int y, int width, int height, string name, string filename, Action<string> onNameEntered)
+        public NominationWindow(Canvas canvas, int x, int y, int width, int height, string name, string filename, Action<string> createAction)
             : base(canvas, x, y, width, height, name)
         {
             this.fileName = filename;
-            this.onNameEntered = onNameEntered;
+            this.createAction = createAction;
         }
 
         public override void Initialize()
@@ -38,7 +38,7 @@ namespace SentinelOS.GUI
                     case ConsoleKey.Enter:
                         if (fileName.Length > 0)
                         {
-                            onNameEntered?.Invoke(fileName);
+                            createAction(fileName);
                         }
                         windowState = WindowState.ToClose;
                         break;
