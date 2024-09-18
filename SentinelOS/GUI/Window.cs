@@ -11,6 +11,14 @@ using MouseState = Cosmos.System.MouseState;
 
 namespace SentinelOS.GUI
 {
+    public enum WindowState
+    {
+        Sleeping,
+        Running,
+        ToClose
+    }
+
+
     public abstract class Window
     {
         protected Canvas canvas;
@@ -20,7 +28,7 @@ namespace SentinelOS.GUI
         protected int windowHeight;
         protected bool isMaximized;
         protected bool isMinimized;
-        protected bool isRunning;
+        protected WindowState windowState;
 
         private int originalX, originalY, originalWidth, originalHeight;
         private bool isDragging = false;
@@ -43,7 +51,7 @@ namespace SentinelOS.GUI
             this.windowY = y;
             this.windowWidth = width;
             this.windowHeight = height;
-            this.isRunning = false;
+            this.windowState = WindowState.Sleeping;
             this.name = name;
 
             this.originalX = x;
@@ -69,7 +77,10 @@ namespace SentinelOS.GUI
         public abstract void HandleMouseInput();
         public abstract void Draw();
         public abstract void Run();
-        public bool IsRunning => isRunning;
+        public WindowState GetWindowState()
+        {
+            return windowState;
+        }
 
         protected void DrawTitleBar()
         {
@@ -90,7 +101,7 @@ namespace SentinelOS.GUI
                 MouseManager.Y >= closeButton.Y && MouseManager.Y <= closeButton.Y + closeButton.Height &&
                 MouseManager.MouseState == MouseState.Left)
             {
-                isRunning = false;
+                windowState = WindowState.ToClose;
             }
             else if (MouseManager.X >= minimizeButton.X && MouseManager.X <= minimizeButton.X + minimizeButton.Width &&
                      MouseManager.Y >= minimizeButton.Y && MouseManager.Y <= minimizeButton.Y + minimizeButton.Height &&
@@ -125,7 +136,7 @@ namespace SentinelOS.GUI
                 DragWindow();
             }
         }
-        //TODO: FIX MINIMIZE AND MAXIMIZE METHODS
+        //TODO: FIX AND COMPLMENT IMPLEMENTATION -> MINIMIZE AND MAXIMIZE METHODS
         private void Minimize()
         {
             if (!isMinimized)

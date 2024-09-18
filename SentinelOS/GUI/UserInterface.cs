@@ -104,14 +104,26 @@ namespace SentinelOS.GUI
             }
         }
 
+        //private void HandleCreateItem(Action<string> createAction, string name)
+        //{
+        //    string itemName = HandleFileNomination(name);
+        //    if (itemName != null)
+        //    {
+        //        createAction(itemName);
+        //        Refresh();
+        //    }
+        //}
+
         private void HandleCreateItem(Action<string> createAction, string name)
         {
-            string itemName = HandleFileNomination(name);
-            if (itemName != null)
+            var nominationWindow = new NominationWindow(canvas, 100, 100, 300, 100, "NominationWindow", name, (itemName) =>
             {
                 createAction(itemName);
                 Refresh();
-            }
+            });
+
+            windowManager.AddWindow(nominationWindow);
+            nominationWindow.Initialize();
         }
 
         private string HandleFileNomination(string nameBase)
