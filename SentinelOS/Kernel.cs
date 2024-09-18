@@ -16,7 +16,7 @@ namespace SentinelOS
         {
             Console.WriteLine("SentinelOS is booting...");
             DirectoryManager.CreateSystemFiles();
-            DirectoryManager.ClearDir(true);
+            //DirectoryManager.ClearDir(true);
             consoleManager = new ConsoleManager();
 
             Console.WriteLine("SentinelOS has booted successfully!");
@@ -29,6 +29,8 @@ namespace SentinelOS
 
         protected override void Run()
         {
+            //var input = Console.ReadLine();
+            //consoleManager.ExecuteCommand(input);
             TaskManager.ExecuteAllTasks();
             Heap.Collect();
         }

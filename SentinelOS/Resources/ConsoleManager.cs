@@ -1,4 +1,5 @@
 ﻿using Cosmos;
+using Cosmos.System.FileSystem.VFS;
 using SentinelOS.GUI;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,7 @@ namespace SentinelOS.Resources
             { "cat", (string arg) => PrintFileContent(arg) },
             { "echo", (string arg) => Echo(arg) },
             { "help", (string arg) => ConsoleHelp(arg) },
+            { "resetdisk", (string arg) => ResetDisk() },
             { "pwd", (string arg) => PrintWorkingDirectory() }
         };
 
@@ -41,6 +43,7 @@ namespace SentinelOS.Resources
                 { "cat", "args: <name> - Print the content of a file." },
                 { "echo", "args: <content> - Print the content to the console." },
                 { "help", "Print this help text." },
+                { "resetdisk", "Format all partitions of all disks." },
                 { "pwd", "Print the current working directory." }
             };
 
@@ -125,6 +128,28 @@ namespace SentinelOS.Resources
         private static void PrintWorkingDirectory()
         {
             Console.WriteLine(DirectoryManager.CurrentPath);
+        }
+
+        private static void ResetDisk()
+        {
+            var disks = VFSManager.GetDisks();
+            Console.WriteLine(disks.Count + " disks found.");
+            foreach (var disk in disks)
+            {
+                disk.DisplayInformation();
+                for (int i = 0; i < disk.Partitions.Count; i++)
+                {
+                    try
+                    {
+                        disk.FormatPartition(i, "FAT32");
+                        Console.WriteLine("Disk formatted successfully.");
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Error formatting disk: " + e.Message);
+                    }
+                }
+            }
         }
 
         public void ExecuteCommand(string command)

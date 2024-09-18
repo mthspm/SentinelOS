@@ -26,12 +26,12 @@ namespace SentinelOS.GUI
             this.startMenuY = canvas.Mode.Rows - 60;
             this.menuOptions = new List<string>
                     {
-                        "Control Panel",
+                        "Shutdown",
+                        "Restart",
+                        "About System",
                         "Ethernet Connection",
                         "Disk Management",
                         "Task Manager",
-                        "Restart",
-                        "Shutdown",
                         "Terminal"
                     };
         }
