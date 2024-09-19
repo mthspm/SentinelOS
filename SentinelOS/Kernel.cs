@@ -16,7 +16,8 @@ namespace SentinelOS
         {
             Console.WriteLine("SentinelOS is booting...");
             DirectoryManager.CreateSystemFiles();
-            //DirectoryManager.ClearDir(true);
+            DirectoryManager.ClearDir(true);
+            DiskManager.Initialize();
             consoleManager = new ConsoleManager();
 
             Console.WriteLine("SentinelOS has booted successfully!");

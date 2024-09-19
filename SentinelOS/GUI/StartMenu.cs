@@ -98,7 +98,10 @@ namespace SentinelOS.GUI
                     // Ethernet Connection
                     break;
                 case "Disk Management":
-                    // Disk Management
+                    var diskManager = new DiskWindow(canvas, 50, 50, canvas.Mode.Columns - 200, canvas.Mode.Rows - 200, "Disk Manager");
+                    WindowManager.AddWindow(diskManager);
+                    diskManager.Initialize();
+                    break;
                     break;
                 case "Task Manager":
                     // Task Manager
