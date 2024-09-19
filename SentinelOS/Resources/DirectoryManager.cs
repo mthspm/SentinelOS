@@ -18,8 +18,10 @@ namespace SentinelOS.Resources
 
         private static List<string> defaultDirectories = new List<string>
             {
-                Paths.Temp,
                 Paths.Root,
+                Paths.System,
+                Paths.ProgramFiles,
+                Paths.Temp,
                 Paths.User,
                 Paths.Desktop,
             };
