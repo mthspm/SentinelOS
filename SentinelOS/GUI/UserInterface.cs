@@ -9,6 +9,7 @@ using Cosmos.System.FileSystem.Listing;
 using Cosmos.System.FileSystem.VFS;
 using SentinelOS.Resources;
 using System.Reflection.Emit;
+using SentinelOS.Windows;
 
 namespace SentinelOS.GUI
 {
@@ -23,7 +24,6 @@ namespace SentinelOS.GUI
         private int contextMenuY = 0;
         private int highlightedIndex = -1;
         private StartMenu startMenu;
-        private WindowManager windowManager;
         private List<DirectoryEntry> directoryContent;
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace SentinelOS.GUI
         {
             this.canvas = canvas;
             this.startMenu = new StartMenu(canvas);
-            this.windowManager = new WindowManager(canvas);
+            WindowManager.Initialize();
             this.directoryContent = VFSManager.GetDirectoryListing(DirectoryManager.CurrentPath);
         }
 
@@ -47,7 +47,7 @@ namespace SentinelOS.GUI
             HandleMouseHover();
             HandleContextMenu();
             startMenu.HandleDrawStartMenu();
-            windowManager.Run();
+            WindowManager.Run();
             DrawCursor((int)MouseManager.X, (int)MouseManager.Y); // Draw cursor at the end to be on top of everything
         }
 
@@ -100,14 +100,14 @@ namespace SentinelOS.GUI
             {
                 var notepad = new Notepad(canvas, 100, 100, 600, 400, "Notepad");
                 notepad.Initialize(selectedItem.mFullPath);
-                windowManager.AddWindow(notepad);
+                WindowManager.AddWindow(notepad);
             }
         }
 
         private void HandleCreateItem(Action<string> createAction, string defaultName)
         {
             var nominationWindow = new NominationWindow(canvas, 100, 100, 300, 100, "NominationWindow", defaultName, createAction);
-            windowManager.AddWindow(nominationWindow);
+            WindowManager.AddWindow(nominationWindow);
             nominationWindow.Initialize();
         }
 
