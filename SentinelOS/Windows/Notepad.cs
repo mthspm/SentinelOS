@@ -9,7 +9,7 @@ using System.Linq;
 using Cosmos.Core;
 using SentinelOS.Resources;
 
-namespace SentinelOS.GUI
+namespace SentinelOS.Windows
 {
     public class Notepad : Window
     {
@@ -21,17 +21,23 @@ namespace SentinelOS.GUI
         public Notepad(Canvas canvas, int x, int y, int width, int height, string name)
             : base(canvas, x, y, width, height, name)
         {
-            this.textContent = new List<string> { string.Empty };
-            this.cursorX = 0;
-            this.cursorY = 0;
-            this.filePath = string.Empty;
+            textContent = new List<string> { string.Empty };
+            cursorX = 0;
+            cursorY = 0;
+            filePath = string.Empty;
         }
 
         // Used to initialize the Notepad without a pre-existing file
         // Not implemented yet
+        // idea> savefile window
         public override void Initialize()
         {
             windowState = WindowState.Running;
+        }
+
+        public override void CheckWindowStateChanges()
+        {
+            // Not yet implemented
         }
 
         public override void Initialize(string path)
@@ -168,7 +174,7 @@ namespace SentinelOS.GUI
             var penBlack = new Pen(Color.Black);
             canvas.DrawFilledRectangle(new Pen(Color.White), windowX, windowY, windowWidth, windowHeight);
             canvas.DrawRectangle(penBlack, windowX, windowY, windowWidth, windowHeight);
-            DrawTitleBar();
+            DrawTitleBar(Color.Gray);
 
             for (int i = 0; i < textContent.Count; i++)
             {

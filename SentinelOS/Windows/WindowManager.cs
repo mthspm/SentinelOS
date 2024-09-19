@@ -5,43 +5,48 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SentinelOS.GUI
+namespace SentinelOS.Windows
 {
-    public class WindowManager
+    public static class WindowManager
     {
-        private Canvas canvas;
-        private List<Window> windows;
+        private static List<Window> windows;
 
-        public WindowManager(Canvas canvas)
+        public static void Initialize()
         {
-            this.canvas = canvas;
-            this.windows = new List<Window>();
+            windows = new List<Window>();
         }
 
-        public void AddWindow(Window window)
+        public static void AddWindow(Window window)
         {
             windows.Add(window);
         }
 
-        public void RemoveWindow(Window window) {
+        public static void RemoveWindow(Window window)
+        {
             windows.Remove(window);
         }
 
-        public void Clear() {
+        public static void Clear()
+        {
             windows.Clear();
         }
 
-        public List<Window> GetWindows() {
+        public static List<Window> GetWindows()
+        {
             return windows;
         }
 
-        public void Run()
+        public static void Run()
         {
             foreach (Window window in windows)
             {
                 if (window.GetWindowState() == WindowState.Running)
                 {
                     window.Run();
+                }
+                else if (window.GetWindowState() == WindowState.ToClose)
+                {
+                    RemoveWindow(window);
                 }
             }
         }

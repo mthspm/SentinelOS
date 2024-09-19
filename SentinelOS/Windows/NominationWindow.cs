@@ -4,7 +4,7 @@ using SentinelOS.Resources;
 using System;
 using System.Drawing;
 
-namespace SentinelOS.GUI
+namespace SentinelOS.Windows
 {
     public class NominationWindow : Window
     {
@@ -14,7 +14,7 @@ namespace SentinelOS.GUI
         public NominationWindow(Canvas canvas, int x, int y, int width, int height, string name, string filename, Action<string> createAction)
             : base(canvas, x, y, width, height, name)
         {
-            this.fileName = filename;
+            fileName = filename;
             this.createAction = createAction;
         }
 
@@ -26,6 +26,11 @@ namespace SentinelOS.GUI
         public override void Initialize(string path)
         {
             // Not needed for this window
+        }
+
+        public override void CheckWindowStateChanges()
+        {
+            // Not yet implemented
         }
 
         public override void HandleKeyPress()

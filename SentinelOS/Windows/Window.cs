@@ -8,17 +8,10 @@ using System.Text;
 using System.Threading.Tasks;
 using MouseManager = Cosmos.System.MouseManager;
 using MouseState = Cosmos.System.MouseState;
+using Point = Cosmos.System.Graphics.Point;
 
-namespace SentinelOS.GUI
+namespace SentinelOS.Windows
 {
-    public enum WindowState
-    {
-        Sleeping,
-        Running,
-        ToClose
-    }
-
-
     public abstract class Window
     {
         protected Canvas canvas;
@@ -28,36 +21,47 @@ namespace SentinelOS.GUI
         protected int windowHeight;
         protected bool isMaximized;
         protected bool isMinimized;
+        protected bool isDragging = false;
         protected WindowState windowState;
 
         private int originalX, originalY, originalWidth, originalHeight;
-        private bool isDragging = false;
         private int dragOffsetX;
         private int dragOffsetY;
+        
+        private Rectangle minimizeButton;
+        private Rectangle maximizeButton;
+        
+        private Rectangle closeButton;
+        private const int MarginY = 30;
+        private const int MarginX = 10;
 
         public string name { get; protected set; }
 
-        private Rectangle minimizeButton;
-        private Rectangle maximizeButton;
-        private Rectangle closeButton;
-
-        private const int MarginY = 30;
-        private const int MarginX = 10;
+        public abstract void Initialize();
+        public abstract void Initialize(string path);
+        /// <summary>
+        /// This method can be used to update icons or other elements of the window that may change over time.
+        /// </summary>
+        public abstract void CheckWindowStateChanges();
+        public abstract void HandleKeyPress();
+        public abstract void HandleMouseInput();
+        public abstract void Draw();
+        public abstract void Run();
 
         public Window(Canvas canvas, int x, int y, int width, int height, string name)
         {
             this.canvas = canvas;
-            this.windowX = x;
-            this.windowY = y;
-            this.windowWidth = width;
-            this.windowHeight = height;
-            this.windowState = WindowState.Sleeping;
+            windowX = x;
+            windowY = y;
+            windowWidth = width;
+            windowHeight = height;
+            windowState = WindowState.Sleeping;
             this.name = name;
 
-            this.originalX = x;
-            this.originalY = y;
-            this.originalWidth = width;
-            this.originalHeight = height;
+            originalX = x;
+            originalY = y;
+            originalWidth = width;
+            originalHeight = height;
 
             int buttonWidth = 20;
             int buttonHeight = 20;
@@ -68,29 +72,25 @@ namespace SentinelOS.GUI
             minimizeButton = new Rectangle(maximizeButton.X - buttonWidth - buttonPadding, windowY - 25 + buttonPadding, buttonWidth, buttonHeight);
         }
 
-        public abstract void Initialize();
-        public abstract void Initialize(string path);
-        public abstract void HandleKeyPress();
-        /// <summary>
-        /// This method must call <see cref="HandleEssentialMouseInput"/> in order to handle the essential mouse input for the window.
-        /// </summary>
-        public abstract void HandleMouseInput();
-        public abstract void Draw();
-        public abstract void Run();
         public WindowState GetWindowState()
         {
             return windowState;
         }
 
-        protected void DrawTitleBar()
+        /// <summary>
+        /// This method should be called in the <see cref="Draw"/> overried method of every new class that inherits from <see cref="Window"/>.
+        /// </summary>
+        protected void DrawTitleBar(Color color)
         {
-            canvas.DrawFilledRectangle(new Pen(Color.Gray), windowX, windowY - 25, windowWidth, 30);
+            canvas.DrawFilledRectangle(new Pen(color), windowX, windowY - 25, windowWidth, 30);
             canvas.DrawString(name, PCScreenFont.Default, new Pen(Color.Black), windowX + 5, windowY - 20);
+            canvas.DrawFilledRectangle(new Pen(Color.Black), windowX, windowY + 5, windowWidth, 2);
 
-            DrawButton(closeButton, Color.Red, "X");
-            DrawButton(maximizeButton, Color.Black, isMaximized ? "❐" : "□");
-            DrawButton(minimizeButton, Color.Black, "_");
+            DrawButton(closeButton, Color.Red, Color.Black, "X");
+            DrawButton(maximizeButton, Color.Black, Color.White, isMaximized ? "❐" : "□");
+            DrawButton(minimizeButton, Color.Black, Color.White, "_");
         }
+
         /// <summary>
         /// This method should be called in the <see cref="HandleMouseInput"/> overried method of every new class that inherits from <see cref="Window"/>.
         /// It handles the essential mouse input for the window, such as closing the window, draging, minimizing it, etc.
@@ -136,7 +136,49 @@ namespace SentinelOS.GUI
                 DragWindow();
             }
         }
-        //TODO: FIX AND COMPLMENT IMPLEMENTATION -> MINIMIZE AND MAXIMIZE METHODS
+
+        protected void DrawButton(Rectangle buttonRect, Color backgroundColor, Color textColor, string text)
+        {
+            canvas.DrawFilledRectangle(new Pen(backgroundColor), buttonRect.X, buttonRect.Y, buttonRect.Width, buttonRect.Height);
+            canvas.DrawRectangle(new Pen(Color.Black), buttonRect.X, buttonRect.Y, buttonRect.Width, buttonRect.Height);
+            canvas.DrawString(text, PCScreenFont.Default, new Pen(textColor), buttonRect.X + 5, buttonRect.Y + 5);
+        }
+
+        protected List<string> WrapTextToFitWindow(string text)
+        {
+            List<string> lines = new List<string>();
+            StringBuilder currentLine = new StringBuilder();
+            string[] words = text.Split(' ');
+
+            // Assumindo uma fonte monoespaçada, definimos um número máximo de caracteres por linha
+            int maxCharsPerLine = windowWidth / 8; // Ajuste o divisor conforme necessário
+
+            foreach (var word in words)
+            {
+                if (currentLine.Length + word.Length + 1 <= maxCharsPerLine)
+                {
+                    if (currentLine.Length > 0)
+                    {
+                        currentLine.Append(" ");
+                    }
+                    currentLine.Append(word);
+                }
+                else
+                {
+                    lines.Add(currentLine.ToString());
+                    currentLine.Clear();
+                    currentLine.Append(word);
+                }
+            }
+
+            if (currentLine.Length > 0)
+            {
+                lines.Add(currentLine.ToString());
+            }
+
+            return lines;
+        }
+
         private void Minimize()
         {
             if (!isMinimized)
@@ -158,6 +200,7 @@ namespace SentinelOS.GUI
                 windowWidth = originalWidth;
                 windowHeight = originalHeight;
             }
+            UpdateButtonsPositions();
         }
 
         private void Maximize()
@@ -184,6 +227,7 @@ namespace SentinelOS.GUI
                 windowWidth = originalWidth;
                 windowHeight = originalHeight;
             }
+            UpdateButtonsPositions();
         }
 
         private void DragWindow()
@@ -192,6 +236,7 @@ namespace SentinelOS.GUI
             windowY = (int)MouseManager.Y - dragOffsetY;
 
             ClampToScreenBounds();
+            UpdateButtonsPositions();
         }
 
         private void ClampToScreenBounds()
@@ -213,19 +258,16 @@ namespace SentinelOS.GUI
             {
                 windowY = canvas.Mode.Rows - windowHeight - MarginY;
             }
+        }
 
+        private void UpdateButtonsPositions()
+        {
             closeButton.X = windowX + windowWidth - closeButton.Width - 5;
             closeButton.Y = windowY - 25 + 5;
             maximizeButton.X = closeButton.X - maximizeButton.Width - 5;
             maximizeButton.Y = windowY - 25 + 5;
             minimizeButton.X = maximizeButton.X - minimizeButton.Width - 5;
             minimizeButton.Y = windowY - 25 + 5;
-        }
-
-        private void DrawButton(Rectangle buttonRect, Color color, string text)
-        {
-            canvas.DrawFilledRectangle(new Pen(color), buttonRect.X, buttonRect.Y, buttonRect.Width, buttonRect.Height);
-            canvas.DrawString(text, PCScreenFont.Default, new Pen(Color.White), buttonRect.X + 5, buttonRect.Y + 5);
         }
     }
 }
