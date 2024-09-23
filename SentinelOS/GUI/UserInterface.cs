@@ -14,17 +14,17 @@ using SentinelOS.Windows;
 namespace SentinelOS.GUI
 {
     /// <summary>
-    /// Represents the User Interface of the SentinelOS
+    /// Class that handles the User Graphical Interface of the SentinelOS
     /// </summary>
     class UserInterface
     {
-        private Canvas canvas;
+        private readonly Canvas canvas;
         private bool showContextMenu = false;
         private int contextMenuX = 0;
         private int contextMenuY = 0;
         private int highlightedIndex = -1;
         private StartMenu startMenu;
-        private List<DirectoryEntry> directoryContent;
+        private List<DirectoryEntry> desktopDirectoryEntries;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserInterface"/> class.
@@ -34,10 +34,10 @@ namespace SentinelOS.GUI
             this.canvas = canvas;
             this.startMenu = new StartMenu(canvas);
             WindowManager.Initialize();
-            this.directoryContent = VFSManager.GetDirectoryListing(DirectoryManager.CurrentPath);
+            this.desktopDirectoryEntries = DirectoryManager.GetDirectoryEntries(Paths.Desktop);
         }
 
-        private void DrawUserInterface()
+        public void DrawUserInterface()
         {
             //canvas.Clear(Color.Aqua);
             DrawBackground();
@@ -47,8 +47,6 @@ namespace SentinelOS.GUI
             HandleMouseHover();
             HandleContextMenu();
             startMenu.HandleDrawStartMenu();
-            WindowManager.Run();
-            DrawCursor((int)MouseManager.X, (int)MouseManager.Y); // Draw cursor at the end to be on top of everything
         }
 
         public void Run()
@@ -62,7 +60,7 @@ namespace SentinelOS.GUI
             canvas.DrawImage(Resources.backgroundBitmap, 0, 0);
         }
 
-        private void HandleMouseInput()
+        public void HandleMouseInput()
         {
             if (MouseManager.MouseState == MouseState.Right && MouseManager.Y < 690) // Outside the taskbar
             {
@@ -90,11 +88,12 @@ namespace SentinelOS.GUI
 
         private void HandleSysFileExecution()
         {
-            var selectedItem = directoryContent[highlightedIndex];
+            var selectedItem = desktopDirectoryEntries[highlightedIndex];
             if (selectedItem.mEntryType == DirectoryEntryTypeEnum.Directory)
             {
-                DirectoryManager.CurrentPath = selectedItem.mFullPath;
-                Refresh();
+                var explorer = new Explorer(canvas, 100, 100, 800, 600, "Explorer");
+                explorer.Initialize(selectedItem.mFullPath);
+                WindowManager.AddWindow(explorer);
             }
             else if (selectedItem.mEntryType == DirectoryEntryTypeEnum.File)
             {
@@ -104,16 +103,9 @@ namespace SentinelOS.GUI
             }
         }
 
-        private void HandleCreateItem(Action<string> createAction, string defaultName)
-        {
-            var nominationWindow = new NominationWindow(canvas, 100, 100, 300, 100, "NominationWindow", defaultName, createAction);
-            WindowManager.AddWindow(nominationWindow);
-            nominationWindow.Initialize();
-        }
-
         private void Refresh()
         {
-            directoryContent = VFSManager.GetDirectoryListing(DirectoryManager.CurrentPath);
+            desktopDirectoryEntries = DirectoryManager.GetDirectoryEntries(Paths.Desktop);
         }
 
         public void DrawTaskbar()
@@ -132,7 +124,7 @@ namespace SentinelOS.GUI
             int startY = 50;
             highlightedIndex = -1;
 
-            for (int i = 0; i < directoryContent.Count; i++)
+            for (int i = 0; i < desktopDirectoryEntries.Count; i++)
             {
                 if (MouseManager.X >= 50 && MouseManager.X <= 300 && MouseManager.Y >= startY && MouseManager.Y <= startY + 30)
                 {
@@ -172,9 +164,9 @@ namespace SentinelOS.GUI
 
                 string optionText = i switch
                 {
-                    0 => "Criar Pasta",
-                    1 => "Criar Arquivo",
-                    2 => "Atualizar",
+                    0 => "New Folder",
+                    1 => "New File",
+                    2 => "Refresh",
                     _ => ""
                 };
 
@@ -188,7 +180,6 @@ namespace SentinelOS.GUI
             {
                 int relativeY = y - contextMenuY;
                 int optionIndex = relativeY / 20;
-
                 switch (optionIndex)
                 {
                     case 0:
@@ -201,9 +192,15 @@ namespace SentinelOS.GUI
                         Refresh();
                         break;
                 }
-
                 showContextMenu = false;
             }
+        }
+
+        private void HandleCreateItem(Action<string> createAction, string defaultName)
+        {
+            var nominationWindow = new NominationWindow(canvas, 100, 100, 300, 100, "NominationWindow", defaultName, createAction);
+            WindowManager.AddWindow(nominationWindow);
+            nominationWindow.Initialize();
         }
 
         private void HandleContextMenu()
@@ -228,31 +225,14 @@ namespace SentinelOS.GUI
             }
         }
 
-        public void DrawNominationWindow(string fileName)
-        {
-            int windowWidth = 300;
-            int windowHeight = 100;
-            int windowX = (canvas.Mode.Columns - windowWidth) / 2;
-            int windowY = (canvas.Mode.Rows - windowHeight) / 2;
-
-            canvas.DrawFilledRectangle(new Pen(Color.White), windowX, windowY, windowWidth, windowHeight);
-            canvas.DrawRectangle(new Pen(Color.Black), windowX, windowY, windowWidth, windowHeight);
-            canvas.DrawString("Nome do Arquivo/Pasta:", PCScreenFont.Default, new Pen(Color.Black), windowX + 10, windowY + 10);
-
-            canvas.DrawFilledRectangle(new Pen(Color.White), windowX + 10, windowY + 40, windowWidth - 20, 20);
-            canvas.DrawString(fileName, PCScreenFont.Default, new Pen(Color.Black), windowX + 10, windowY + 40);
-
-            canvas.Display(); // NEED TO REMOVE THIS
-        }
-
         public void DrawDesktopContents()
         {
             int startY = 50;
             int startX = 30;
 
-            for (int i = 0; i < directoryContent.Count; i++)
+            for (int i = 0; i < desktopDirectoryEntries.Count; i++)
             {
-                var item = directoryContent[i];
+                var item = desktopDirectoryEntries[i];
                 Pen textPen;
 
                 textPen = (i == highlightedIndex) ? new Pen(Color.MediumPurple) : new Pen(Color.White);

@@ -9,23 +9,31 @@ using Cosmos.System.FileSystem.Listing;
 using System.IO;
 using System.Xml.Linq;
 using System.IO.Enumeration;
+using SentinelOS.Resources.Handlers;
+using SentinelOS.Windows;
 
 namespace SentinelOS.Resources
 {
+    /// <summary>
+    /// SentinelOS directory manager class that contains methods to manage directories.
+    /// </summary>
     class DirectoryManager
     {
         public static string CurrentPath { get; set; } = Paths.Root;
 
-        private static List<string> defaultDirectories = new List<string>
-            {
-                Paths.Root,
-                Paths.System,
-                Paths.ProgramFiles,
-                Paths.Temp,
-                Paths.User,
-                Paths.Desktop,
-            };
+        private readonly static List<string> defaultDirectories = new List<string>
+                {
+                    Paths.Root,
+                    Paths.System,
+                    Paths.ProgramFiles,
+                    Paths.Temp,
+                    Paths.User,
+                    Paths.Desktop,
+                };
 
+        /// <summary>
+        /// Creates the system files and directories.
+        /// </summary>
         public static void CreateSystemFiles()
         {
             CosmosVFS vfs = new CosmosVFS();
@@ -40,6 +48,10 @@ namespace SentinelOS.Resources
             CurrentPath = Paths.Desktop;
         }
 
+        /// <summary>
+        /// Creates a directory with the specified name.
+        /// </summary>
+        /// <param name="name">The name of the directory to create.</param>
         public static void CreateDir(string name)
         {
             string dirPath = CurrentPath + @"\" + name;
@@ -57,10 +69,14 @@ namespace SentinelOS.Resources
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                AlertHandler.DisplayAlert(AlertType.Error, e.Message);
             }
         }
 
+        /// <summary>
+        /// Deletes the directory at the specified path.
+        /// </summary>
+        /// <param name="path">The path of the directory to delete.</param>
         public static void DeleteDir(string path)
         {
             try
@@ -74,10 +90,48 @@ namespace SentinelOS.Resources
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                AlertHandler.DisplayAlert(AlertType.Error, e.Message);
             }
         }
 
+        /// <summary>
+        /// Retrieves the list of directory entries in the current directory.
+        /// </summary>
+        /// <returns>A list of DirectoryEntry objects representing the directory entries.</returns>
+        public static List<DirectoryEntry> GetDirectoryEntries()
+        {
+            try
+            {
+                return VFSManager.GetDirectoryListing(CurrentPath);
+            }
+            catch (Exception e)
+            {
+                AlertHandler.DisplayAlert(AlertType.Error, e.Message);
+                return new List<DirectoryEntry>();
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the list of directory entries in the specified directory.
+        /// </summary>
+        /// <param name="apath">The path of the directory.</param>
+        /// <returns>A list of DirectoryEntry objects representing the directory entries.</returns>
+        public static List<DirectoryEntry> GetDirectoryEntries(string apath)
+        {
+            try
+            {
+                return VFSManager.GetDirectoryListing(apath);
+            }
+            catch (Exception e)
+            {
+                AlertHandler.DisplayAlert(AlertType.Error, e.Message);
+                return new List<DirectoryEntry>();
+            }
+        }
+
+        /// <summary>
+        /// Lists the contents of the current directory.
+        /// </summary>
         public static void ListDir()
         {
             var directoryListing = VFSManager.GetDirectoryListing(CurrentPath);
@@ -95,6 +149,10 @@ namespace SentinelOS.Resources
             }
         }
 
+        /// <summary>
+        /// Changes the current directory to the specified directory.
+        /// </summary>
+        /// <param name="name">The name of the directory to change to.</param>
         public static void ChangeDir(string name)
         {
             if (VFSManager.DirectoryExists(CurrentPath + @"\" + name))
@@ -117,13 +175,23 @@ namespace SentinelOS.Resources
                 Console.WriteLine("Directory not found");
             }
         }
+
+        public static void MoveToParentDirectory()
+        {
+            if (CurrentPath == Paths.Root)
+            {
+                AlertHandler.DisplayAlert(AlertType.Warning, "You are already in the root directory");
+                return;
+            }
+            CurrentPath = CurrentPath.Remove(CurrentPath.LastIndexOf(@"\"));
+        }
+
         /// <summary>
-        /// Clear the current directory
+        /// Clears the current directory.
         /// </summary>
-        /// <param name="recursive"> `true` to clear all subdirectories and files ; `false` to clear only files</param>
+        /// <param name="recursive">`true` to clear all subdirectories and files; `false` to clear only files.</param>
         public static void ClearDir(bool recursive)
         {
-            // Get all files and directories in the current directory
             var directoryListing = VFSManager.GetDirectoryListing(CurrentPath);
             foreach (var entry in directoryListing)
             {
@@ -140,17 +208,22 @@ namespace SentinelOS.Resources
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Error deleting {entry.mFullPath}: {e.Message}");
+                    string msg = $"Error deleting {entry.mFullPath}: {e.Message}";
+                    AlertHandler.DisplayAlert(AlertType.Error, msg);
                 }
             }
             Console.WriteLine("Directory cleared");
         }
 
+        /// <summary>
+        /// Checks if the specified path is a valid system path.
+        /// </summary>
+        /// <param name="path">The path to check.</param>
+        /// <returns>True if the path is a valid system path; otherwise, false.</returns>
         public static bool IsValidSystemPath(string path)
         {
             return path.StartsWith(Paths.Root, StringComparison.OrdinalIgnoreCase);
         }
-
     }
 
 }

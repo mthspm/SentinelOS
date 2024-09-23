@@ -1,9 +1,10 @@
-﻿using Cosmos.Core.Memory;
-using SentinelOS.Resources;
-using System;
+﻿using System;
 using Sys = Cosmos.System;
 using Cosmos.System.FileSystem.VFS;
 using Cosmos.System.FileSystem;
+using Cosmos.Core.Memory;
+using SentinelOS.Resources;
+using SentinelOS.Resources.CMD;
 
 namespace SentinelOS
 {
@@ -11,7 +12,6 @@ namespace SentinelOS
     {
         private ConsoleManager consoleManager;
         private InterfaceManager interfaceManager;
-
         protected override void BeforeRun()
         {
             Console.WriteLine("SentinelOS is booting...");

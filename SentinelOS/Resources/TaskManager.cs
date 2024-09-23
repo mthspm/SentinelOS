@@ -22,8 +22,8 @@ namespace SentinelOS.Resources
             PID = pid;
             ParentPID = parentPID;
             State = TaskState.Running;
-            MemoryUsage = 0; // Inicialize com um valor padrão
-            ThreadCount = 1; // Inicialize com um valor padrão
+            MemoryUsage = 0;
+            ThreadCount = 1;
         }
 
         public void UpdateState(TaskState newState)
@@ -66,7 +66,6 @@ namespace SentinelOS.Resources
     public class OSTaskWithoutParams : OSTask
     {
         private Action TaskAction { get; set; }
-
         public OSTaskWithoutParams(string name, int pid, int parentPID, Action taskAction)
             : base(name, pid, parentPID)
         {
