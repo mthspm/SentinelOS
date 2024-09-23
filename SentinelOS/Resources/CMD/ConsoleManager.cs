@@ -7,12 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SentinelOS.Resources
+namespace SentinelOS.Resources.CMD
 {
     class ConsoleManager
     {
         //This class will handle all console related operations, like ls, cd, mkdir, etc.
-
         private static Dictionary<string, Action<string>> commandMap = new Dictionary<string, Action<string>>()
         {
             { "ls", (string arg) => ListDirectory() },

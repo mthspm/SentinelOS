@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SentinelOS.Resources
+namespace SentinelOS.Resources.CMD
 {
     class Nano
     {
@@ -50,12 +50,15 @@ namespace SentinelOS.Resources
                 }
             }
 
-            private void LoadCursorPosition(List<string> lines) {
+            private void LoadCursorPosition(List<string> lines)
+            {
                 cursorY = lines.Count - 1;
-                if (cursorY >= 0) {
+                if (cursorY >= 0)
+                {
                     cursorX = lines[cursorY].Length;
                 }
-                else {
+                else
+                {
                     cursorX = 0;
                     lines.Add(string.Empty);
                 }
