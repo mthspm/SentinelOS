@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using MouseManager = Cosmos.System.MouseManager;
 using MouseState = Cosmos.System.MouseState;
-using Point = Cosmos.System.Graphics.Point;
 
 namespace SentinelOS.Windows
 {
@@ -36,7 +35,6 @@ namespace SentinelOS.Windows
         private const int MarginX = 10;
 
         public string name { get; protected set; }
-
         public abstract void Initialize();
         public abstract void Initialize(string path);
         /// <summary>
@@ -77,6 +75,11 @@ namespace SentinelOS.Windows
             return windowState;
         }
 
+        public bool IsHovered()
+        {
+            return IsMouseOver(windowX, windowY, windowWidth, windowHeight);
+        }
+
         /// <summary>
         /// This method should be called in the <see cref="Draw"/> overried method of every new class that inherits from <see cref="Window"/>.
         /// </summary>
@@ -97,27 +100,19 @@ namespace SentinelOS.Windows
         /// </summary>
         protected void HandleEssentialMouseInput()
         {
-            if (MouseManager.X >= closeButton.X && MouseManager.X <= closeButton.X + closeButton.Width &&
-                MouseManager.Y >= closeButton.Y && MouseManager.Y <= closeButton.Y + closeButton.Height &&
-                MouseManager.MouseState == MouseState.Left)
+            if (IsMouseOver(closeButton) && MouseManager.MouseState == MouseState.Left)
             {
                 windowState = WindowState.ToClose;
             }
-            else if (MouseManager.X >= minimizeButton.X && MouseManager.X <= minimizeButton.X + minimizeButton.Width &&
-                     MouseManager.Y >= minimizeButton.Y && MouseManager.Y <= minimizeButton.Y + minimizeButton.Height &&
-                     MouseManager.MouseState == MouseState.Left)
+            else if (IsMouseOver(minimizeButton) && MouseManager.MouseState == MouseState.Left)
             {
                 Minimize();
             }
-            else if (MouseManager.X >= maximizeButton.X && MouseManager.X <= maximizeButton.X + maximizeButton.Width &&
-                     MouseManager.Y >= maximizeButton.Y && MouseManager.Y <= maximizeButton.Y + maximizeButton.Height &&
-                     MouseManager.MouseState == MouseState.Left)
+            else if (IsMouseOver(maximizeButton) && MouseManager.MouseState == MouseState.Left)
             {
                 Maximize();
             }
-            else if (MouseManager.X >= windowX && MouseManager.X <= windowX + windowWidth &&
-                     MouseManager.Y >= windowY - 25 && MouseManager.Y <= windowY &&
-                     MouseManager.MouseState == MouseState.Left)
+            else if (IsMouseOver(windowX, windowY - 25, windowWidth, 25) && MouseManager.MouseState == MouseState.Left)
             {
                 if (!isDragging)
                 {
@@ -137,6 +132,18 @@ namespace SentinelOS.Windows
             }
         }
 
+        protected bool IsMouseOver(Rectangle button)
+        {
+            return MouseManager.X >= button.X && MouseManager.X <= button.X + button.Width &&
+                   MouseManager.Y >= button.Y && MouseManager.Y <= button.Y + button.Height;
+        }
+
+        protected bool IsMouseOver(int x, int y, int width, int height)
+        {
+            return MouseManager.X >= x && MouseManager.X <= x + width &&
+                   MouseManager.Y >= y && MouseManager.Y <= y + height;
+        }
+
         protected void DrawButton(Rectangle buttonRect, Color backgroundColor, Color textColor, string text)
         {
             canvas.DrawFilledRectangle(new Pen(backgroundColor), buttonRect.X, buttonRect.Y, buttonRect.Width, buttonRect.Height);
@@ -150,8 +157,7 @@ namespace SentinelOS.Windows
             StringBuilder currentLine = new StringBuilder();
             string[] words = text.Split(' ');
 
-            // Assumindo uma fonte monoespaçada, definimos um número máximo de caracteres por linha
-            int maxCharsPerLine = windowWidth / 8; // Ajuste o divisor conforme necessário
+            int maxCharsPerLine = windowWidth / 8;
 
             foreach (var word in words)
             {

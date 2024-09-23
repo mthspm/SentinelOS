@@ -40,15 +40,28 @@ namespace SentinelOS.Windows
         {
             foreach (Window window in windows)
             {
-                if (window.GetWindowState() == WindowState.Running)
+                switch (window.GetWindowState())
                 {
-                    window.Run();
-                }
-                else if (window.GetWindowState() == WindowState.ToClose)
-                {
-                    RemoveWindow(window);
+                    case WindowState.Running:
+                        window.Run();
+                        break;
+                    case WindowState.ToClose:
+                        RemoveWindow(window);
+                        break;
+                    default:
+                        break;
                 }
             }
+        }
+
+        public static bool HasActiveWindow()
+        {
+            return windows.Any(window => window.GetWindowState() == WindowState.Running);
+        }
+
+        public static bool HasHoveredWindow()
+        {
+            return windows.Any(window => window.IsHovered());
         }
     }
 }

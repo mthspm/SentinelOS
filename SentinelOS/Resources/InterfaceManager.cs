@@ -1,11 +1,14 @@
-﻿using Cosmos.System.Graphics;
-using SentinelOS.GUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Cosmos.System;
+using Cosmos.System.Graphics;
+using SentinelOS.GUI;
+using SentinelOS.Resources.Handlers;
+using SentinelOS.Windows;
 using MouseManager = Cosmos.System.MouseManager;
 
 namespace SentinelOS.Resources
@@ -14,12 +17,13 @@ namespace SentinelOS.Resources
     {
         private Canvas canvas;
         private UserInterface userInterface;
-
+        
         public InterfaceManager(int width, int height)
         {
             canvas = FullScreenCanvas.GetFullScreenCanvas(new Mode(width, height, ColorDepth.ColorDepth32));
             SetupMouse(width, height);
             userInterface = new UserInterface(canvas);
+            AlertHandler.Initialize(canvas);
         }
 
         private void SetupMouse(int width, int height)
@@ -30,12 +34,16 @@ namespace SentinelOS.Resources
             MouseManager.Y = (uint)height / 2;
         }
 
-
         public void Run()
         {
-            userInterface.Run();
+            userInterface.DrawUserInterface();
+            if (!WindowManager.HasActiveWindow() && !WindowManager.HasHoveredWindow())
+            {
+                userInterface.HandleMouseInput();
+            }
+            WindowManager.Run();
+            userInterface.DrawCursor((int)MouseManager.X, (int)MouseManager.Y);
             canvas.Display();
         }
-
     }
 }

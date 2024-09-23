@@ -1,6 +1,8 @@
 ﻿using Cosmos.System.FileSystem.Listing;
 using Cosmos.System.FileSystem.VFS;
 using SentinelOS.Resources;
+using SentinelOS.Resources.Handlers;
+using SentinelOS.Windows;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +26,7 @@ namespace SentinelOS.Resources
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                AlertHandler.DisplayAlert(AlertType.Error, e.Message);
             }
         }
 
@@ -43,7 +45,7 @@ namespace SentinelOS.Resources
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                AlertHandler.DisplayAlert(AlertType.Error, e.Message);
             }
         }
 
@@ -56,7 +58,7 @@ namespace SentinelOS.Resources
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                AlertHandler.DisplayAlert(AlertType.Error, e.Message);
             }
         }
 
@@ -70,7 +72,7 @@ namespace SentinelOS.Resources
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                AlertHandler.DisplayAlert(AlertType.Error, e.Message);
                 return null;
             }
         }
@@ -85,7 +87,7 @@ namespace SentinelOS.Resources
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                AlertHandler.DisplayAlert(AlertType.Error, e.Message);
             }
         }
 
