@@ -9,7 +9,8 @@ using Cosmos.System.FileSystem.Listing;
 using Cosmos.System.FileSystem.VFS;
 using SentinelOS.Resources;
 using System.Reflection.Emit;
-using SentinelOS.Windows;
+using SentinelOS.GUI.Windows;
+using SentinelOS.Resources.Managers;
 
 namespace SentinelOS.GUI
 {

@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Cosmos.System.Graphics;
-using SentinelOS.Windows;
 using SentinelOS.Resources;
+using SentinelOS.GUI.Windows;
 
 namespace SentinelOS.Resources.Handlers
 {

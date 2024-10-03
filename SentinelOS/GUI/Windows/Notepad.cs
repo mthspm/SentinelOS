@@ -7,9 +7,9 @@ using Cosmos.System.FileSystem.VFS;
 using System.Collections.Generic;
 using System.Linq;
 using Cosmos.Core;
-using SentinelOS.Resources;
+using SentinelOS.Resources.Managers;
 
-namespace SentinelOS.Windows
+namespace SentinelOS.GUI.Windows
 {
     public class Notepad : Window
     {

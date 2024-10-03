@@ -3,8 +3,8 @@ using Sys = Cosmos.System;
 using Cosmos.System.FileSystem.VFS;
 using Cosmos.System.FileSystem;
 using Cosmos.Core.Memory;
-using SentinelOS.Resources;
 using SentinelOS.Resources.CMD;
+using SentinelOS.Resources.Managers;
 
 namespace SentinelOS
 {

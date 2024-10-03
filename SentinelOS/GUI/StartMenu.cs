@@ -7,7 +7,7 @@ using Cosmos.System.Graphics.Fonts;
 using MouseManager = Cosmos.System.MouseManager;
 using MouseState = Cosmos.System.MouseState;
 using SentinelOS.Resources;
-using SentinelOS.Windows;
+using SentinelOS.GUI.Windows;
 
 namespace SentinelOS.GUI
 {

@@ -2,7 +2,7 @@
 using Cosmos.System.FileSystem.VFS;
 using Cosmos.System.Graphics;
 using Cosmos.System.Graphics.Fonts;
-using SentinelOS.Resources;
+using SentinelOS.Resources.Managers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using MouseManager = Cosmos.System.MouseManager;
 using MouseState = Cosmos.System.MouseState;
 
-namespace SentinelOS.Windows
+namespace SentinelOS.GUI.Windows
 {
     public class Explorer : Window
     {
@@ -42,7 +42,7 @@ namespace SentinelOS.Windows
 
         public override void CheckWindowStateChanges()
         {
-            
+
         }
 
         public override void Initialize(string path)
@@ -87,7 +87,7 @@ namespace SentinelOS.Windows
                     UpdateDirectoryContent();
                 }
 
-                if (showContextMenu && (MouseManager.X >= contextMenuX && MouseManager.X <= contextMenuX + 150 && MouseManager.Y >= contextMenuY && MouseManager.Y <= contextMenuY + 60))
+                if (showContextMenu && MouseManager.X >= contextMenuX && MouseManager.X <= contextMenuX + 150 && MouseManager.Y >= contextMenuY && MouseManager.Y <= contextMenuY + 60)
                 {
                     HandleContextMenuSelection((int)MouseManager.X, (int)MouseManager.Y);
                 }
@@ -159,7 +159,7 @@ namespace SentinelOS.Windows
 
             for (int i = 0; i < 3; i++)
             {
-                Pen backgroundPen = (i == highlightedOption) ? new Pen(Color.LightGray) : new Pen(Color.Gray);
+                Pen backgroundPen = i == highlightedOption ? new Pen(Color.LightGray) : new Pen(Color.Gray);
                 Pen textPen = new Pen(Color.Black);
 
                 canvas.DrawFilledRectangle(backgroundPen, x, y + i * optionHeight, width, optionHeight);
@@ -242,7 +242,7 @@ namespace SentinelOS.Windows
             for (int i = 0; i < directoryContent.Count; i++)
             {
                 var item = directoryContent[i];
-                Pen textPen = (i == highlightedIndex) ? new Pen(Color.MediumPurple) : new Pen(Color.White);
+                Pen textPen = i == highlightedIndex ? new Pen(Color.MediumPurple) : new Pen(Color.White);
 
                 if (item.mEntryType == DirectoryEntryTypeEnum.Directory)
                 {

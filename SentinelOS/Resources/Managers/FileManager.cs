@@ -1,8 +1,7 @@
 ﻿using Cosmos.System.FileSystem.Listing;
 using Cosmos.System.FileSystem.VFS;
-using SentinelOS.Resources;
+using SentinelOS.GUI.Windows;
 using SentinelOS.Resources.Handlers;
-using SentinelOS.Windows;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SentinelOS.Resources
+namespace SentinelOS.Resources.Managers
 {
     class FileManager
     {
@@ -49,7 +48,8 @@ namespace SentinelOS.Resources
             }
         }
 
-        public static void CreateEmptyFile(string name) {
+        public static void CreateEmptyFile(string name)
+        {
             string path = DirectoryManager.CurrentPath + @"\" + name;
             try
             {

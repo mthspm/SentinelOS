@@ -1,4 +1,5 @@
 ﻿using Cosmos.System.FileSystem.VFS;
+using SentinelOS.Resources.Managers;
 using System;
 using System.Collections.Generic;
 using System.IO;

@@ -10,9 +10,9 @@ using System.IO;
 using System.Xml.Linq;
 using System.IO.Enumeration;
 using SentinelOS.Resources.Handlers;
-using SentinelOS.Windows;
+using SentinelOS.GUI.Windows;
 
-namespace SentinelOS.Resources
+namespace SentinelOS.Resources.Managers
 {
     /// <summary>
     /// SentinelOS directory manager class that contains methods to manage directories.

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using MouseManager = Cosmos.System.MouseManager;
 using MouseState = Cosmos.System.MouseState;
 
-namespace SentinelOS.Windows
+namespace SentinelOS.GUI.Windows
 {
     public abstract class Window
     {
@@ -26,10 +26,10 @@ namespace SentinelOS.Windows
         private int originalX, originalY, originalWidth, originalHeight;
         private int dragOffsetX;
         private int dragOffsetY;
-        
+
         private Rectangle minimizeButton;
         private Rectangle maximizeButton;
-        
+
         private Rectangle closeButton;
         private const int MarginY = 30;
         private const int MarginX = 10;

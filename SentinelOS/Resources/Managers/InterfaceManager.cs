@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 using Cosmos.System;
 using Cosmos.System.Graphics;
 using SentinelOS.GUI;
+using SentinelOS.GUI.Windows;
 using SentinelOS.Resources.Handlers;
-using SentinelOS.Windows;
 using MouseManager = Cosmos.System.MouseManager;
 
-namespace SentinelOS.Resources
+namespace SentinelOS.Resources.Managers
 {
     class InterfaceManager
     {
         private Canvas canvas;
         private UserInterface userInterface;
-        
+
         public InterfaceManager(int width, int height)
         {
             canvas = FullScreenCanvas.GetFullScreenCanvas(new Mode(width, height, ColorDepth.ColorDepth32));

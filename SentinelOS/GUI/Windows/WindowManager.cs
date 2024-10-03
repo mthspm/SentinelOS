@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SentinelOS.Windows
+namespace SentinelOS.GUI.Windows
 {
     public static class WindowManager
     {

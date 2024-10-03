@@ -2,7 +2,7 @@
 using Cosmos.System.FileSystem.VFS;
 using Cosmos.System.Graphics;
 using Cosmos.System.Graphics.Fonts;
-using SentinelOS.Resources;
+using SentinelOS.Resources.Managers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SentinelOS.Windows
+namespace SentinelOS.GUI.Windows
 {
     public class DiskWindow : Window
     {

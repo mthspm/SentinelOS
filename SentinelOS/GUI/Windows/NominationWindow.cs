@@ -4,7 +4,7 @@ using SentinelOS.Resources;
 using System;
 using System.Drawing;
 
-namespace SentinelOS.Windows
+namespace SentinelOS.GUI.Windows
 {
     public class NominationWindow : Window
     {

@@ -5,7 +5,7 @@ using Cosmos.System.FileSystem;
 using System.Security.Principal;
 
 
-namespace SentinelOS.Resources
+namespace SentinelOS.Resources.Managers
 {
     public static class DiskExtensions
     {
@@ -40,8 +40,8 @@ namespace SentinelOS.Resources
 
         public static void Initialize()
         {
-            try 
-            { 
+            try
+            {
                 disks = VFSManager.GetDisks();
                 Console.WriteLine("DiskManager Initialized with" + disks.Count + " disks found.");
             }
@@ -88,7 +88,7 @@ namespace SentinelOS.Resources
             List<string> disksInfo = new List<string>();
             try
             {
-                for (int i = 0; i < disks.Count; i++) 
+                for (int i = 0; i < disks.Count; i++)
                 {
                     var diskInfo = GetDisk(i).GetDiskInformation();
                     diskInfo.Insert(0, $"Disk {i}");
