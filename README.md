@@ -44,6 +44,38 @@ In order to achieve this, the system will have a simple interface that will allo
 - [ ] Game
 - [ ] Browser
 
+## Preview
+
+### Boot Console
+<p align="left">
+  <img width="460" height="300" src="Preview/Screenshot 2024-10-03 125023.png">
+</p>
+
+### Desktop
+<p align="left">
+  <img width="460" height="300" src="Preview/Screenshot 2024-10-03 125047.png">
+</p>
+
+### Start Menu
+<p align="left">
+  <img width="460" height="300" src="Preview/Screenshot 2024-10-03 125106.png">
+</p>
+
+### Disk Management (Under construction)
+<p align="left">
+  <img width="460" height="300" src="Preview/Screenshot 2024-10-03 125120.png">
+</p>
+
+### File Explorer
+<p align="left">
+  <img width="460" height="300" src="Preview/Screenshot 2024-10-03 125155.png">
+</p>
+
+### Notepad
+<p align="left">
+  <img width="460" height="300" src="Preview/Screenshot 2024-10-03 125354.png">
+</p>
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) file for details.
