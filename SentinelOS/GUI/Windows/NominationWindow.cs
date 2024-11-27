@@ -10,12 +10,25 @@ namespace SentinelOS.GUI.Windows
     {
         private string fileName;
         private Action<string> createAction;
+        private Func<string, string, bool> renameAction;
+        private string oldName;
+        private Action refresh;
 
-        public NominationWindow(Canvas canvas, int x, int y, int width, int height, string name, string filename, Action<string> createAction)
+        public NominationWindow(Canvas canvas, int x, int y, int width, int height, string name, string filename, Action<string> createAction, Action refresh)
             : base(canvas, x, y, width, height, name)
         {
             fileName = filename;
             this.createAction = createAction;
+            this.refresh = refresh;
+        }
+
+        public NominationWindow(Canvas canvas, int x, int y, int width, int height, string name, string oldName, Func<string, string, bool> renameAction, Action refresh)
+            : base(canvas, x, y, width, height, name)
+        {
+            this.oldName = oldName;
+            fileName = oldName;
+            this.renameAction = renameAction;
+            this.refresh = refresh;
         }
 
         public override void Initialize()
@@ -43,7 +56,16 @@ namespace SentinelOS.GUI.Windows
                     case ConsoleKey.Enter:
                         if (fileName.Length > 0)
                         {
-                            createAction(fileName);
+                            if (createAction != null)
+                            {
+                                createAction(fileName);
+                                refresh();
+                            }
+                            else if (renameAction != null)
+                            {
+                                renameAction(oldName, fileName);
+                                refresh();
+                            }
                         }
                         windowState = WindowState.ToClose;
                         break;

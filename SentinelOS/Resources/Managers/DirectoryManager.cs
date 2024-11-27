@@ -114,13 +114,13 @@ namespace SentinelOS.Resources.Managers
         /// <summary>
         /// Retrieves the list of directory entries in the specified directory.
         /// </summary>
-        /// <param name="apath">The path of the directory.</param>
+        /// <param name="path">The path of the directory.</param>
         /// <returns>A list of DirectoryEntry objects representing the directory entries.</returns>
-        public static List<DirectoryEntry> GetDirectoryEntries(string apath)
+        public static List<DirectoryEntry> GetDirectoryEntries(string path)
         {
             try
             {
-                return VFSManager.GetDirectoryListing(apath);
+                return VFSManager.GetDirectoryListing(path);
             }
             catch (Exception e)
             {

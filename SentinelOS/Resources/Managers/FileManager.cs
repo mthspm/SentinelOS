@@ -91,5 +91,22 @@ namespace SentinelOS.Resources.Managers
             }
         }
 
+        public static bool RenameFile(string oldName, string newName)
+        {
+            string oldPath = DirectoryManager.CurrentPath + @"\" + oldName;
+            string newPath = DirectoryManager.CurrentPath + @"\" + newName;
+            try
+            {
+                File.Move(oldPath, newPath);
+                Console.WriteLine("File renamed with success");
+                return true;
+            }
+            catch (Exception e)
+            {
+                AlertHandler.DisplayAlert(AlertType.Error, e.Message);
+                return false;
+            }
+        }
+
     }
 }

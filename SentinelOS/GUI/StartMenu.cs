@@ -8,6 +8,7 @@ using MouseManager = Cosmos.System.MouseManager;
 using MouseState = Cosmos.System.MouseState;
 using SentinelOS.Resources;
 using SentinelOS.GUI.Windows;
+using SentinelOS.Resources.Managers;
 
 namespace SentinelOS.GUI
 {
@@ -34,11 +35,6 @@ namespace SentinelOS.GUI
                         "Disk Management",
                         "Task Manager",
                         "Terminal",
-                        "Alert info",
-                        "Alert warning",
-                        "Alert error",
-                        "Alert success",
-                        "Alert question",
                     };
         }
 
@@ -95,15 +91,21 @@ namespace SentinelOS.GUI
 
         private void HandleMenuSelection(int index)
         {
-            var center_x = canvas.Mode.Columns / 2;
-            var center_y = canvas.Mode.Rows / 2;
+            var centerX = canvas.Mode.Columns / 2;
+            var centerY = canvas.Mode.Rows / 2;
             switch (menuOptions[index])
             {
                 case "Restart":
-                    SystemCalls.Restart();
+                    var questionWindow = new AlertWindow(canvas, centerX, centerY, 300, 100, "Restart", AlertType.Question, "Are you sure you want to restart the system?");
+                    questionWindow.SetCallback(SystemCalls.Restart);
+                    WindowManager.AddWindow(questionWindow);
+                    questionWindow.Initialize();
                     break;
                 case "Shutdown":
-                    SystemCalls.Shutdown();
+                    var shutdownQuestion = new AlertWindow(canvas, centerX, centerY, 300, 100, "Shutdown", AlertType.Question, "Are you sure you want to shutdown the system?");
+                    shutdownQuestion.SetCallback(SystemCalls.Shutdown);
+                    WindowManager.AddWindow(shutdownQuestion);
+                    shutdownQuestion.Initialize();
                     break;
                 case "Disk Management":
                     var diskManager = new DiskWindow(canvas, 50, 50, canvas.Mode.Columns - 200, canvas.Mode.Rows - 200, "Disk Manager");
@@ -111,41 +113,24 @@ namespace SentinelOS.GUI
                     diskManager.Initialize();
                     break;
                 case "About System":
-                    // About System
+                    var aboutWindow = new AboutWindow(canvas, centerX - 150, centerY - 150, 350, 500, "About System");
+                    WindowManager.AddWindow(aboutWindow);
+                    aboutWindow.Initialize();
                     break;
                 case "Task Manager":
-                    // Task Manager
+                    var taskWindow = new TaskManagerWindow(canvas, 50, 50, 500, 450, "Task Manager");
+                    WindowManager.AddWindow(taskWindow);
+                    taskWindow.Initialize();
                     break;
                 case "Ethernet Connection":
-                    // Ethernet Connection
+                    var ethernetWindow = new EthernetWindow(canvas, 50, 50, 500, 450, "Ethernet Connection");
+                    WindowManager.AddWindow(ethernetWindow);
+                    ethernetWindow.Initialize();
                     break;
                 case "Terminal":
-                    // Command Prompt
-                    break;
-                case "Alert info":
-                    var alertInfo = new AlertWindow(canvas, center_x, center_y, 300, 100, "Alert", AlertType.Info, "This is an info alert");
-                    WindowManager.AddWindow(alertInfo);
-                    alertInfo.Initialize();
-                    break;
-                case "Alert warning":
-                    var alertWarning = new AlertWindow(canvas, center_x, center_y, 300, 100, "Alert", AlertType.Warning, "This is a warning alert");
-                    WindowManager.AddWindow(alertWarning);
-                    alertWarning.Initialize();
-                    break;
-                case "Alert error":
-                    var alertError = new AlertWindow(canvas, center_x, center_y, 300, 100, "Alert", AlertType.Error, "This is an error alert");
-                    WindowManager.AddWindow(alertError);
-                    alertError.Initialize();
-                    break;
-                case "Alert success":
-                    var alertSuccess = new AlertWindow(canvas, center_x, center_y, 300, 100, "Alert", AlertType.Success, "This is a success alert");
-                    WindowManager.AddWindow(alertSuccess);
-                    alertSuccess.Initialize();
-                    break;
-                case "Alert question":
-                    var alertQuestion = new AlertWindow(canvas, center_x, center_y, 300, 100, "Alert", AlertType.Question, "This is a question alert, choose a option!");
-                    WindowManager.AddWindow(alertQuestion);
-                    alertQuestion.Initialize();
+                    var cmd = new ConsoleWindow(canvas, centerX - 100, centerY - 100, 450, 400, "Terminal");
+                    WindowManager.AddWindow(cmd);
+                    cmd.Initialize();
                     break;
             }
         }

@@ -38,11 +38,6 @@ namespace SentinelOS.Resources.Managers
         }
 
         public abstract void Execute();
-
-        public override string ToString()
-        {
-            return $"PID: {PID} | Name: {Name} | State: {State} | Memory Usage: {MemoryUsage} | Thread Count: {ThreadCount} | Parent PID: {ParentPID}";
-        }
     }
 
     public class OSTask<T> : OSTask
@@ -93,8 +88,15 @@ namespace SentinelOS.Resources.Managers
 
     public static class TaskManager
     {
-        private static List<OSTask> tasks = new List<OSTask>();
+        private static List<OSTask> tasks;
         private static int nextPID = 1;
+        private static int nextParentPID = 1;
+        private static int nextTaskPID = 1;
+
+        public static void Initialize()
+        {
+            tasks = new List<OSTask>();
+        }
 
         /// <summary>
         /// Add tasks to the task manager to be executed.
@@ -142,7 +144,7 @@ namespace SentinelOS.Resources.Managers
 
         public static List<OSTask> ListTasks()
         {
-            return new List<OSTask>(tasks);
+            return tasks;
         }
 
         public static bool UpdateTaskState(int pid, TaskState newState)
@@ -169,7 +171,6 @@ namespace SentinelOS.Resources.Managers
         {
             foreach (var task in tasks)
             {
-                // Simule a atualização do uso de recursos
                 task.UpdateResourceUsage(new Random().Next(100, 1000), new Random().Next(1, 10));
             }
         }
