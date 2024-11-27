@@ -127,7 +127,10 @@ namespace SentinelOS.GUI
 
             for (int i = 0; i < desktopDirectoryEntries.Count; i++)
             {
-                if (MouseManager.X >= 50 && MouseManager.X <= 300 && MouseManager.Y >= startY && MouseManager.Y <= startY + 30)
+                var currentItem = desktopDirectoryEntries[i];
+                var currentItemName = currentItem.mFullPath; //While we don't have icons, we will use the full path as the name
+                var currentItemNameSize = currentItemName.Length * 9;
+                if (MouseManager.X >= 50 && MouseManager.X <= currentItemNameSize && MouseManager.Y >= startY && MouseManager.Y <= startY + 30)
                 {
                     highlightedIndex = i;
                     break;
@@ -199,7 +202,7 @@ namespace SentinelOS.GUI
 
         private void HandleCreateItem(Action<string> createAction, string defaultName)
         {
-            var nominationWindow = new NominationWindow(canvas, 100, 100, 300, 100, "NominationWindow", defaultName, createAction);
+            var nominationWindow = new NominationWindow(canvas, 100, 100, 300, 100, "NominationWindow", defaultName, createAction, Refresh);
             WindowManager.AddWindow(nominationWindow);
             nominationWindow.Initialize();
         }

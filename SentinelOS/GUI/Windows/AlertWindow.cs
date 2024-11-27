@@ -17,7 +17,7 @@ namespace SentinelOS.GUI.Windows
         private AlertType alertType;
         private List<string> alertMessage;
         private Pen alertWindowColor;
-        private bool? questionResult;
+        private Action callback;
         private Rectangle confirmButton;
         private Rectangle denyButton;
 
@@ -34,7 +34,6 @@ namespace SentinelOS.GUI.Windows
             alertWindowColor = GetAlertWindowColor();
             if (alertType == AlertType.Question)
             {
-                questionResult = null;
                 InitializeButtons();
             }
             windowState = WindowState.Running;
@@ -86,16 +85,20 @@ namespace SentinelOS.GUI.Windows
 
                     if (confirmButton.Contains(mouseX, mouseY))
                     {
-                        questionResult = true;
+                        callback?.Invoke();
                         windowState = WindowState.ToClose;
                     }
                     else if (denyButton.Contains(mouseX, mouseY))
                     {
-                        questionResult = false;
                         windowState = WindowState.ToClose;
                     }
                 }
             }
+        }
+
+        public void SetCallback(Action callback)
+        {
+            this.callback = callback;
         }
 
         public override void Draw()

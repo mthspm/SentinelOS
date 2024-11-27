@@ -15,7 +15,7 @@ namespace SentinelOS.GUI.Windows
     public class DiskWindow : Window
     {
         private List<string> disksInfo;
-
+        
         public DiskWindow(Canvas canvas, int x, int y, int width, int height, string name)
             : base(canvas, x, y, width, height, name)
         {
@@ -71,12 +71,7 @@ namespace SentinelOS.GUI.Windows
 
         private void CollectDisksInformation()
         {
-            this.disksInfo.Clear();
-            List<string> disksInfo = DiskManager.GetAllDisksInformation();
-            foreach (var diskInfo in disksInfo)
-            {
-                this.disksInfo.Add(diskInfo);
-            }
+            this.disksInfo = DiskManager.GetAllDisksInformation();
         }
 
         private void DrawDiskWindow()

@@ -21,8 +21,8 @@ namespace SentinelOS.GUI.Windows
         private bool showContextMenu = false;
         private int contextMenuX = 0;
         private int contextMenuY = 0;
-        private const int backArrowSize = 20;
-        private const int backArrowPadding = 10;
+        private const int BackArrowSize = 20;
+        private const int BackArrowPadding = 10;
 
         public Explorer(Canvas canvas, int x, int y, int width, int height, string name)
             : base(canvas, x, y, width, height, name)
@@ -79,9 +79,9 @@ namespace SentinelOS.GUI.Windows
 
             if (MouseManager.MouseState == MouseState.Left)
             {
-                int arrowX = windowX + backArrowPadding;
+                int arrowX = windowX + BackArrowPadding;
                 int arrowY = windowY + 40;
-                if (IsMouseOver(arrowX, arrowY, backArrowSize, backArrowSize))
+                if (IsMouseOver(arrowX, arrowY, BackArrowSize, BackArrowSize))
                 {
                     DirectoryManager.MoveToParentDirectory();
                     UpdateDirectoryContent();
@@ -123,9 +123,14 @@ namespace SentinelOS.GUI.Windows
             }
         }
 
+        private void Refresh()
+        {
+            directoryContent = DirectoryManager.GetDirectoryEntries();
+        }
+
         private void HandleCreateItem(Action<string> createAction, string defaultName)
         {
-            var nominationWindow = new NominationWindow(canvas, 100, 100, 300, 100, "NominationWindow", defaultName, createAction);
+            var nominationWindow = new NominationWindow(canvas, 100, 100, 300, 100, "NominationWindow", defaultName, createAction, Refresh);
             WindowManager.AddWindow(nominationWindow);
             nominationWindow.Initialize();
         }
@@ -196,11 +201,13 @@ namespace SentinelOS.GUI.Windows
         {
             int startY = windowY + 80;
             int startX = windowX + 10;
-
             highlightedIndex = -1;
             for (int i = 0; i < directoryContent.Count; i++)
             {
-                if (IsMouseOver(startX, startY, windowWidth - 20, 20))
+                var currentItem = directoryContent[i];
+                var currentItemName = currentItem.mName;
+                var currentItemNameSize = currentItemName.Length * 10;
+                if (MouseManager.X >= startX && MouseManager.X <= startX + currentItemNameSize && MouseManager.Y >= startY && MouseManager.Y <= startY + 20)
                 {
                     highlightedIndex = i;
                     break;
@@ -212,7 +219,7 @@ namespace SentinelOS.GUI.Windows
         private void DrawBackButton(int x, int y)
         {
             Pen buttonPen = new Pen(Color.White);
-            canvas.DrawFilledRectangle(buttonPen, x, y, backArrowSize, backArrowSize);
+            canvas.DrawFilledRectangle(buttonPen, x, y, BackArrowSize, BackArrowSize);
         }
 
         public override void Draw()
@@ -221,7 +228,7 @@ namespace SentinelOS.GUI.Windows
             canvas.DrawFilledRectangle(new Pen(Color.Gray), windowX, windowY, windowWidth, 30);
             DrawTitleBar(Color.Gray);
 
-            int arrowX = windowX + backArrowPadding;
+            int arrowX = windowX + BackArrowPadding;
             int arrowY = windowY + 40;
             DrawBackButton(arrowX, arrowY);
 
