@@ -21,10 +21,11 @@ namespace SentinelOS.GUI
     {
         private readonly Canvas canvas;
         private bool showContextMenu = false;
+        private bool isContextMenuForItems = false;
         private int contextMenuX = 0;
         private int contextMenuY = 0;
         private int highlightedIndex = -1;
-        private StartMenu startMenu;
+        private readonly StartMenu startMenu;
         private List<DirectoryEntry> desktopDirectoryEntries;
 
         /// <summary>
@@ -68,11 +69,13 @@ namespace SentinelOS.GUI
                 showContextMenu = true;
                 contextMenuX = (int)MouseManager.X;
                 contextMenuY = (int)MouseManager.Y;
+                isContextMenuForItems = highlightedIndex != -1;
             }
 
             if (MouseManager.MouseState == MouseState.Left)
             {
-                if (showContextMenu && (MouseManager.X >= contextMenuX && MouseManager.X <= contextMenuX + 150 && MouseManager.Y >= contextMenuY && MouseManager.Y <= contextMenuY + 60))
+                if (showContextMenu && (MouseManager.X >= contextMenuX && MouseManager.X <= contextMenuX + 150 &&
+                                        MouseManager.Y >= contextMenuY && MouseManager.Y <= contextMenuY + 60))
                 {
                     HandleContextMenuSelection((int)MouseManager.X, (int)MouseManager.Y);
                 }
@@ -84,23 +87,33 @@ namespace SentinelOS.GUI
             }
 
             startMenu.HandleMouseInput();
-
         }
 
         private void HandleSysFileExecution()
         {
             var selectedItem = desktopDirectoryEntries[highlightedIndex];
-            if (selectedItem.mEntryType == DirectoryEntryTypeEnum.Directory)
+            switch (selectedItem.mEntryType)
             {
-                var explorer = new Explorer(canvas, 100, 100, 800, 600, "Explorer");
-                explorer.Initialize(selectedItem.mFullPath);
-                WindowManager.AddWindow(explorer);
-            }
-            else if (selectedItem.mEntryType == DirectoryEntryTypeEnum.File)
-            {
-                var notepad = new Notepad(canvas, 100, 100, 600, 400, "Notepad");
-                notepad.Initialize(selectedItem.mFullPath);
-                WindowManager.AddWindow(notepad);
+                case DirectoryEntryTypeEnum.Directory:
+                    var explorer = new Explorer(canvas, 100, 100, 800, 600, "Explorer");
+                    explorer.Initialize(selectedItem.mFullPath);
+                    WindowManager.AddWindow(explorer);
+                    break;
+                case DirectoryEntryTypeEnum.File:
+                    if (selectedItem.mFullPath.EndsWith(".exe"))
+                    {
+                        var cmd = new ConsoleWindow(canvas, 100, 100, 450, 400, "Terminal");
+                        WindowManager.AddWindow(cmd);
+                        cmd.Initialize();
+                        cmd.WriteLine("Executing " + selectedItem.mFullPath);
+                    }
+                    else
+                    {
+                        var notepad = new Notepad(canvas, 100, 100, 600, 400, "Notepad");
+                        notepad.Initialize(selectedItem.mFullPath);
+                        WindowManager.AddWindow(notepad);
+                    }
+                    break;
             }
         }
 
@@ -180,7 +193,8 @@ namespace SentinelOS.GUI
 
         private void HandleContextMenuSelection(int x, int y)
         {
-            if (showContextMenu && x >= contextMenuX && x <= contextMenuX + 150 && y >= contextMenuY && y <= contextMenuY + 60)
+            if (showContextMenu && x >= contextMenuX && x <= contextMenuX + 150 &&
+                y >= contextMenuY && y <= contextMenuY + 60)
             {
                 int relativeY = y - contextMenuY;
                 int optionIndex = relativeY / 20;
@@ -237,9 +251,7 @@ namespace SentinelOS.GUI
             for (int i = 0; i < desktopDirectoryEntries.Count; i++)
             {
                 var item = desktopDirectoryEntries[i];
-                Pen textPen;
-
-                textPen = (i == highlightedIndex) ? new Pen(Color.MediumPurple) : new Pen(Color.White);
+                Pen textPen = (i == highlightedIndex) ? new Pen(Color.MediumPurple) : new Pen(Color.White);
 
                 canvas.DrawString(item.mFullPath, PCScreenFont.Default, textPen, startX, startY);
                 //TODO : Draw Icons

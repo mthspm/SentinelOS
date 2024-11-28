@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -15,14 +16,17 @@ namespace SentinelOS.Resources.Managers
 {
     class InterfaceManager
     {
-        private Canvas canvas;
-        private UserInterface userInterface;
+        private readonly Canvas canvas;
+        private readonly UserInterface userInterface;
+        private readonly LoginWindow loginWindow;
 
         public InterfaceManager(int width, int height)
         {
             canvas = FullScreenCanvas.GetFullScreenCanvas(new Mode(width, height, ColorDepth.ColorDepth32));
             SetupMouse(width, height);
             userInterface = new UserInterface(canvas);
+            loginWindow = new LoginWindow(canvas, 0, 0, width, height, "Login");
+            loginWindow.Initialize();
             AlertHandler.Initialize(canvas);
         }
 
@@ -36,14 +40,28 @@ namespace SentinelOS.Resources.Managers
 
         public void Run()
         {
-            userInterface.DrawUserInterface();
-            if (!WindowManager.HasActiveWindow() && !WindowManager.HasHoveredWindow())
+            if (!HandleLoginWindow())
             {
-                userInterface.HandleMouseInput();
+                userInterface.DrawUserInterface();
+                if (!WindowManager.HasActiveWindow() && !WindowManager.HasHoveredWindow())
+                {
+                    userInterface.HandleMouseInput();
+                }
+
+                WindowManager.Run();
             }
-            WindowManager.Run();
             userInterface.DrawCursor((int)MouseManager.X, (int)MouseManager.Y);
             canvas.Display();
+        }
+
+        private bool HandleLoginWindow()
+        {
+            if (loginWindow.GetWindowState() == WindowState.Running)
+            {
+                loginWindow.Run();
+                return true;
+            }
+            return false;
         }
     }
 }
