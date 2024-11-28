@@ -21,11 +21,14 @@ namespace SentinelOS.GUI
     {
         private readonly Canvas canvas;
         private bool showContextMenu = false;
+        private bool isContextMenuForItems = false;
         private int contextMenuX = 0;
         private int contextMenuY = 0;
         private int highlightedIndex = -1;
-        private StartMenu startMenu;
+        private readonly StartMenu startMenu;
         private List<DirectoryEntry> desktopDirectoryEntries;
+        private DateTime lastClickTime;
+        private const int DebounceInterval = 200;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserInterface"/> class.
@@ -36,6 +39,7 @@ namespace SentinelOS.GUI
             this.startMenu = new StartMenu(canvas);
             WindowManager.Initialize();
             this.desktopDirectoryEntries = DirectoryManager.GetDirectoryEntries(Paths.Desktop);
+            lastClickTime = DateTime.MinValue;
         }
 
         public void DrawUserInterface()
@@ -61,6 +65,16 @@ namespace SentinelOS.GUI
             canvas.DrawImage(Resources.backgroundBitmap, 0, 0);
         }
 
+        private bool PreventDoubleClick()
+        {
+            if ((DateTime.Now - lastClickTime).TotalMilliseconds < DebounceInterval)
+            {
+                return true;
+            }
+            lastClickTime = DateTime.Now;
+            return false;
+        }
+
         public void HandleMouseInput()
         {
             if (MouseManager.MouseState == MouseState.Right && MouseManager.Y < 690) // Outside the taskbar
@@ -68,39 +82,52 @@ namespace SentinelOS.GUI
                 showContextMenu = true;
                 contextMenuX = (int)MouseManager.X;
                 contextMenuY = (int)MouseManager.Y;
+                isContextMenuForItems = highlightedIndex != -1;
             }
 
             if (MouseManager.MouseState == MouseState.Left)
             {
-                if (showContextMenu && (MouseManager.X >= contextMenuX && MouseManager.X <= contextMenuX + 150 && MouseManager.Y >= contextMenuY && MouseManager.Y <= contextMenuY + 60))
+                if (showContextMenu && (MouseManager.X >= contextMenuX && MouseManager.X <= contextMenuX + 150 &&
+                                        MouseManager.Y >= contextMenuY && MouseManager.Y <= contextMenuY + 60))
                 {
                     HandleContextMenuSelection((int)MouseManager.X, (int)MouseManager.Y);
                 }
                 if(highlightedIndex != -1)
                 {
+                    if (PreventDoubleClick()) return;
                     HandleSysFileExecution();
                 }
                 showContextMenu = false;
             }
 
             startMenu.HandleMouseInput();
-
         }
 
         private void HandleSysFileExecution()
         {
             var selectedItem = desktopDirectoryEntries[highlightedIndex];
-            if (selectedItem.mEntryType == DirectoryEntryTypeEnum.Directory)
+            switch (selectedItem.mEntryType)
             {
-                var explorer = new Explorer(canvas, 100, 100, 800, 600, "Explorer");
-                explorer.Initialize(selectedItem.mFullPath);
-                WindowManager.AddWindow(explorer);
-            }
-            else if (selectedItem.mEntryType == DirectoryEntryTypeEnum.File)
-            {
-                var notepad = new Notepad(canvas, 100, 100, 600, 400, "Notepad");
-                notepad.Initialize(selectedItem.mFullPath);
-                WindowManager.AddWindow(notepad);
+                case DirectoryEntryTypeEnum.Directory:
+                    var explorer = new Explorer(canvas, 100, 100, 800, 600, "Explorer");
+                    explorer.Initialize(selectedItem.mFullPath);
+                    WindowManager.AddWindow(explorer);
+                    break;
+                case DirectoryEntryTypeEnum.File:
+                    if (selectedItem.mFullPath.EndsWith(".exe"))
+                    {
+                        var cmd = new ConsoleWindow(canvas, 100, 100, 450, 400, "Terminal");
+                        WindowManager.AddWindow(cmd);
+                        cmd.Initialize();
+                        cmd.WriteLine("Executing " + selectedItem.mFullPath);
+                    }
+                    else
+                    {
+                        var notepad = new Notepad(canvas, 100, 100, 600, 400, "Notepad");
+                        notepad.Initialize(selectedItem.mFullPath);
+                        WindowManager.AddWindow(notepad);
+                    }
+                    break;
             }
         }
 
@@ -180,7 +207,8 @@ namespace SentinelOS.GUI
 
         private void HandleContextMenuSelection(int x, int y)
         {
-            if (showContextMenu && x >= contextMenuX && x <= contextMenuX + 150 && y >= contextMenuY && y <= contextMenuY + 60)
+            if (showContextMenu && x >= contextMenuX && x <= contextMenuX + 150 &&
+                y >= contextMenuY && y <= contextMenuY + 60)
             {
                 int relativeY = y - contextMenuY;
                 int optionIndex = relativeY / 20;
@@ -237,9 +265,7 @@ namespace SentinelOS.GUI
             for (int i = 0; i < desktopDirectoryEntries.Count; i++)
             {
                 var item = desktopDirectoryEntries[i];
-                Pen textPen;
-
-                textPen = (i == highlightedIndex) ? new Pen(Color.MediumPurple) : new Pen(Color.White);
+                Pen textPen = (i == highlightedIndex) ? new Pen(Color.MediumPurple) : new Pen(Color.White);
 
                 canvas.DrawString(item.mFullPath, PCScreenFont.Default, textPen, startX, startY);
                 //TODO : Draw Icons

@@ -21,7 +21,7 @@ namespace SentinelOS.Resources.Managers
     {
         public static string CurrentPath { get; set; } = Paths.Root;
 
-        private readonly static List<string> defaultDirectories = new List<string>
+        private static readonly List<string> defaultDirectories = new List<string>
                 {
                     Paths.Root,
                     Paths.System,
@@ -186,6 +186,15 @@ namespace SentinelOS.Resources.Managers
             CurrentPath = CurrentPath.Remove(CurrentPath.LastIndexOf(@"\"));
         }
 
+        public static string GetParentDirectory(string path)
+        {
+            if (path == Paths.Root)
+            {
+                return Paths.Root;
+            }
+            return path.Remove(path.LastIndexOf(@"\"));
+        }
+
         /// <summary>
         /// Clears the current directory.
         /// </summary>
@@ -193,6 +202,36 @@ namespace SentinelOS.Resources.Managers
         public static void ClearDir(bool recursive)
         {
             var directoryListing = VFSManager.GetDirectoryListing(CurrentPath);
+            foreach (var entry in directoryListing)
+            {
+                try
+                {
+                    if (entry.mEntryType == DirectoryEntryTypeEnum.Directory)
+                    {
+                        Directory.Delete(entry.mFullPath, recursive);
+                    }
+                    else
+                    {
+                        File.Delete(entry.mFullPath);
+                    }
+                }
+                catch (Exception e)
+                {
+                    string msg = $"Error deleting {entry.mFullPath}: {e.Message}";
+                    AlertHandler.DisplayAlert(AlertType.Error, msg);
+                }
+            }
+            Console.WriteLine("Directory cleared");
+        }
+
+        /// <summary>
+        /// Clears the directory at the specified path.
+        /// </summary>
+        /// <param name="recursive"></param>
+        /// <param name="path"></param>
+        public static void ClearDir(bool recursive, string path)
+        {
+            var directoryListing = VFSManager.GetDirectoryListing(path);
             foreach (var entry in directoryListing)
             {
                 try

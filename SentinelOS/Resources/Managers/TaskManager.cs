@@ -198,6 +198,10 @@ namespace SentinelOS.Resources.Managers
                 {
                     task.Execute();
                 }
+                else if (task.State == TaskState.Stopped)
+                {
+                    RemoveTask(task.PID);
+                }
             }
         }
     }

@@ -15,8 +15,8 @@ namespace SentinelOS.Resources.Handlers
     public static class AlertHandler
     {
         private static Canvas Canvas;
-        private static int center_x = 1280 / 2;
-        private static int center_y = 720 / 2;
+        private static int centerX = 1280 / 2;
+        private static int centerY = 720 / 2;
 
         /// <summary>
         /// Initializes the error handler with the specified canvas to display alerts on.
@@ -33,9 +33,11 @@ namespace SentinelOS.Resources.Handlers
         /// </summary>
         /// <param name="alertType">The type of alert to display.</param>
         /// <param name="message">The message to display in the alert window.</param>
+        /// <param name="width">The width of the alert window.</param>
+        /// <param name="height">The height of the alert window.</param>
         public static void DisplayAlert(AlertType alertType, string message, int width=300, int height=100)
         {
-            AlertWindow alertWindow = new AlertWindow(Canvas, center_x, center_y, width, height, "Alert", alertType, message);
+            AlertWindow alertWindow = new AlertWindow(Canvas, centerX, centerY, width, height, "Alert", alertType, message);
             WindowManager.AddWindow(alertWindow);
             alertWindow.Initialize();
         }

@@ -29,18 +29,18 @@ namespace SentinelOS.Resources.Managers
             }
         }
 
-        public static void WriteLinesToFile(string fullpath, List<string> lines)
+        public static void WriteLinesToFile(string fullPath, List<string> lines)
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(fullpath))
+                using (StreamWriter writer = new StreamWriter(fullPath))
                 {
                     foreach (string line in lines)
                     {
                         writer.WriteLine(line);
                     }
                 }
-                Console.WriteLine("\nFile saved with success at " + fullpath);
+                Console.WriteLine("\nFile saved with success at " + fullPath);
             }
             catch (Exception e)
             {
@@ -50,10 +50,18 @@ namespace SentinelOS.Resources.Managers
 
         public static void CreateEmptyFile(string name)
         {
+            name = CleanFileName(name);
+
+            if (string.IsNullOrEmpty(name))
+            {
+                AlertHandler.DisplayAlert(AlertType.Error, "Invalid file name.");
+                return;
+            }
+
             string path = DirectoryManager.CurrentPath + @"\" + name;
             try
             {
-                File.Create(path);
+                VFSManager.CreateFile(path);
                 Console.WriteLine("File created with success");
             }
             catch (Exception e)
@@ -62,13 +70,31 @@ namespace SentinelOS.Resources.Managers
             }
         }
 
+        private static string CleanFileName(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return string.Empty;
+            }
+
+            char[] invalidChars = VFSManager.GetInvalidFileNameChars();
+            foreach (char c in invalidChars)
+            {
+                name = name.Replace(c.ToString(), string.Empty);
+            }
+
+            name = name.Trim();
+            name = name.Trim('.');
+            return name;
+        }
+
         public static string ReadFile(string name)
         {
             string path = DirectoryManager.CurrentPath + @"\" + name;
             try
             {
-                var file_content = File.ReadAllText(path);
-                return file_content;
+                var fileContent = File.ReadAllText(path);
+                return fileContent;
             }
             catch (Exception e)
             {
@@ -95,11 +121,26 @@ namespace SentinelOS.Resources.Managers
         {
             string oldPath = DirectoryManager.CurrentPath + @"\" + oldName;
             string newPath = DirectoryManager.CurrentPath + @"\" + newName;
+
             try
             {
-                File.Move(oldPath, newPath);
-                Console.WriteLine("File renamed with success");
-                return true;
+                if (VFSManager.FileExists(oldPath))
+                {
+                    var fileStream = VFSManager.GetFile(oldPath).GetFileStream();
+                    var newFileStream = VFSManager.CreateFile(newPath).GetFileStream();
+
+                    fileStream.CopyTo(newFileStream);
+                    fileStream.Close();
+                    newFileStream.Close();
+
+                    VFSManager.DeleteFile(oldPath);
+                    AlertHandler.DisplayAlert(AlertType.Success, "File renamed with success!");
+                    return true;
+                }
+
+                AlertHandler.DisplayAlert(AlertType.Error, "File not found!");
+                return false;
+
             }
             catch (Exception e)
             {

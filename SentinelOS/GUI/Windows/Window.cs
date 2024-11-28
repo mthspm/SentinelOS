@@ -22,6 +22,8 @@ namespace SentinelOS.GUI.Windows
         protected bool isMinimized;
         protected bool isDragging = false;
         protected WindowState windowState;
+        private DateTime lastClickTime;
+        private const int DebounceInterval = 200;
 
         private int originalX, originalY, originalWidth, originalHeight;
         private int dragOffsetX;
@@ -65,6 +67,8 @@ namespace SentinelOS.GUI.Windows
             int buttonHeight = 20;
             int buttonPadding = 5;
 
+            lastClickTime = DateTime.MinValue;
+
             closeButton = new Rectangle(windowX + windowWidth - buttonWidth - buttonPadding, windowY - 25 + buttonPadding, buttonWidth, buttonHeight);
             maximizeButton = new Rectangle(closeButton.X - buttonWidth - buttonPadding, windowY - 25 + buttonPadding, buttonWidth, buttonHeight);
             minimizeButton = new Rectangle(maximizeButton.X - buttonWidth - buttonPadding, windowY - 25 + buttonPadding, buttonWidth, buttonHeight);
@@ -100,25 +104,28 @@ namespace SentinelOS.GUI.Windows
         /// </summary>
         protected void HandleEssentialMouseInput()
         {
-            if (IsMouseOver(closeButton) && MouseManager.MouseState == MouseState.Left)
+            if (MouseManager.MouseState == MouseState.Left)
             {
-                windowState = WindowState.ToClose;
-            }
-            else if (IsMouseOver(minimizeButton) && MouseManager.MouseState == MouseState.Left)
-            {
-                Minimize();
-            }
-            else if (IsMouseOver(maximizeButton) && MouseManager.MouseState == MouseState.Left)
-            {
-                Maximize();
-            }
-            else if (IsMouseOver(windowX, windowY - 25, windowWidth, 25) && MouseManager.MouseState == MouseState.Left)
-            {
-                if (!isDragging)
+                if (IsMouseOver(closeButton) && !isDragging)
                 {
-                    isDragging = true;
-                    dragOffsetX = (int)MouseManager.X - windowX;
-                    dragOffsetY = (int)MouseManager.Y - windowY;
+                    windowState = WindowState.ToClose;
+                }
+                else if (IsMouseOver(minimizeButton) && !isDragging)
+                {
+                    Minimize();
+                }
+                else if (IsMouseOver(maximizeButton) && !isDragging)
+                {
+                    Maximize();
+                }
+                else if (IsMouseOver(windowX, windowY - 25, windowWidth, 25))
+                {
+                    if (!isDragging)
+                    {
+                        isDragging = true;
+                        dragOffsetX = (int)MouseManager.X - windowX;
+                        dragOffsetY = (int)MouseManager.Y - windowY;
+                    }
                 }
             }
             else if (MouseManager.MouseState == MouseState.None)
@@ -183,6 +190,16 @@ namespace SentinelOS.GUI.Windows
             }
 
             return lines;
+        }
+
+        protected bool PreventDoubleClick()
+        {
+            if ((DateTime.Now - lastClickTime).TotalMilliseconds < DebounceInterval)
+            {
+                return true;
+            }
+            lastClickTime = DateTime.Now;
+            return false;
         }
 
         private void Minimize()

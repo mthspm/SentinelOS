@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SentinelOS.Resources;
+using SentinelOS.Resources.Managers;
 
 namespace SentinelOS.GUI.Windows
 {
@@ -46,6 +48,10 @@ namespace SentinelOS.GUI.Windows
                         window.Run();
                         break;
                     case WindowState.ToClose:
+                        if (window is Explorer)
+                        {
+                            DirectoryManager.CurrentPath = Paths.Desktop;
+                        }
                         RemoveWindow(window);
                         break;
                     default:
