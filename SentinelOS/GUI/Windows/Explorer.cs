@@ -189,9 +189,19 @@ namespace SentinelOS.GUI.Windows
             }
             else if (selectedItem.mEntryType == DirectoryEntryTypeEnum.File)
             {
-                var notepad = new Notepad(canvas, 100, 100, 600, 400, "Notepad");
-                notepad.Initialize(selectedItem.mFullPath);
-                WindowManager.AddWindow(notepad);
+                if (selectedItem.mName.EndsWith(".exe"))
+                {
+                    var cmd = new ConsoleWindow(canvas, 200, 200, 600, 400, "Terminal");
+                    WindowManager.AddWindow(cmd);
+                    cmd.Initialize();
+                    cmd.WriteLine("Executing " + selectedItem.mFullPath);
+                }
+                else
+                {
+                    var notepad = new Notepad(canvas, 200, 200, 600, 400, "Notepad");
+                    notepad.Initialize(selectedItem.mFullPath);
+                    WindowManager.AddWindow(notepad);
+                }
             }
         }
 

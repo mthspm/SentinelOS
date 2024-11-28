@@ -116,14 +116,14 @@ namespace SentinelOS.GUI
                 case DirectoryEntryTypeEnum.File:
                     if (selectedItem.mFullPath.EndsWith(".exe"))
                     {
-                        var cmd = new ConsoleWindow(canvas, 100, 100, 450, 400, "Terminal");
+                        var cmd = new ConsoleWindow(canvas, 200, 200, 600, 400, "Terminal");
                         WindowManager.AddWindow(cmd);
                         cmd.Initialize();
                         cmd.WriteLine("Executing " + selectedItem.mFullPath);
                     }
                     else
                     {
-                        var notepad = new Notepad(canvas, 100, 100, 600, 400, "Notepad");
+                        var notepad = new Notepad(canvas, 200, 200, 600, 400, "Notepad");
                         notepad.Initialize(selectedItem.mFullPath);
                         WindowManager.AddWindow(notepad);
                     }
