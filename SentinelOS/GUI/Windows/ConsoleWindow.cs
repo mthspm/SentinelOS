@@ -1,8 +1,10 @@
 ﻿using Cosmos.System.Graphics;
 using Cosmos.System.Graphics.Fonts;
+using SentinelOS.Resources;
 using SentinelOS.Resources.Managers;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Drawing;
 
 namespace SentinelOS.GUI.Windows
@@ -86,29 +88,43 @@ namespace SentinelOS.GUI.Windows
             outputLines.Clear();
         }
 
+        private void Help()
+        {
+            WriteLine("Commands:");
+            WriteLine("clear - Clear the console");
+            WriteLine("exit - Close the console");
+            WriteLine("help - Display this help message");
+        }
+
         private void ExecuteCommand(string command)
         {
             WriteLine("> " + command);
-            if (command.StartsWith("lua "))
+            if (command == "clear")
             {
-                string script = command.Substring(4);
+                Clear();
+            }
+            else if (command == "exit")
+            {
+                windowState = WindowState.ToClose;
+            }
+            else if (command == "help")
+            {
+                Help();
+            }
+            else
+            {
                 try
                 {
-                    WriteLine("Lua Not Supported Yet");
-                    //luaInterpreter.Execute(script);
+                    Lexer lexer = new Lexer(command);
+                    List<Token> tokens = lexer.Tokenize();
+                    Evaluator evaluator = new Evaluator(tokens);
+                    double result = evaluator.Expression();
+                    WriteLine(result.ToString());
                 }
                 catch (Exception ex)
                 {
                     WriteLine("Error: " + ex.Message);
                 }
-            }
-            else if (command == "clear")
-            {
-                Clear();
-            }
-            else
-            {
-                WriteLine("Unknown command: " + command);
             }
         }
 
