@@ -142,7 +142,7 @@ namespace SentinelOS.GUI
                     ethernetWindow.Initialize();
                     break;
                 case "Terminal":
-                    var cmd = new ConsoleWindow(canvas, centerX - 100, centerY - 100, 450, 400, "Terminal");
+                    var cmd = new ConsoleWindow(canvas, centerX - 100, centerY - 100, 600, 400, "Terminal");
                     WindowManager.AddWindow(cmd);
                     cmd.Initialize();
                     break;
