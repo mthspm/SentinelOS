@@ -27,7 +27,7 @@ namespace SentinelOS.GUI.Windows
         public Explorer(Canvas canvas, int x, int y, int width, int height, string name)
             : base(canvas, x, y, width, height, name)
         {
-            UpdateDirectoryContent();
+            return;
         }
 
         private void UpdateDirectoryContent()
@@ -40,16 +40,16 @@ namespace SentinelOS.GUI.Windows
             windowState = WindowState.Running;
         }
 
-        public override void CheckWindowStateChanges()
-        {
-
-        }
-
         public override void Initialize(string path)
         {
             DirectoryManager.CurrentPath = path;
             UpdateDirectoryContent();
             windowState = WindowState.Running;
+        }
+
+        public override void CheckWindowStateChanges()
+        {
+            // Not yet implemented
         }
 
         public override void HandleKeyPress()
@@ -86,8 +86,8 @@ namespace SentinelOS.GUI.Windows
                     DirectoryManager.MoveToParentDirectory();
                     UpdateDirectoryContent();
                 }
-
-                if (showContextMenu && MouseManager.X >= contextMenuX && MouseManager.X <= contextMenuX + 150 && MouseManager.Y >= contextMenuY && MouseManager.Y <= contextMenuY + 60)
+                if (showContextMenu && MouseManager.X >= contextMenuX && MouseManager.X <= contextMenuX + 150 &&
+                    MouseManager.Y >= contextMenuY && MouseManager.Y <= contextMenuY + 60)
                 {
                     HandleContextMenuSelection((int)MouseManager.X, (int)MouseManager.Y);
                 }
@@ -123,14 +123,9 @@ namespace SentinelOS.GUI.Windows
             }
         }
 
-        private void Refresh()
-        {
-            directoryContent = DirectoryManager.GetDirectoryEntries();
-        }
-
         private void HandleCreateItem(Action<string> createAction, string defaultName)
         {
-            var nominationWindow = new NominationWindow(canvas, 100, 100, 300, 100, "NominationWindow", defaultName, createAction, Refresh);
+            var nominationWindow = new NominationWindow(canvas, 100, 100, 300, 100, "NominationWindow", defaultName, createAction, UpdateDirectoryContent);
             WindowManager.AddWindow(nominationWindow);
             nominationWindow.Initialize();
         }

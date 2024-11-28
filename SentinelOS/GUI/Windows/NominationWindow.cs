@@ -48,70 +48,73 @@ namespace SentinelOS.GUI.Windows
 
         public override void HandleKeyPress()
         {
-            if (Console.KeyAvailable)
+            if (!Console.KeyAvailable)
             {
-                var keyInfo = Console.ReadKey(true);
-                switch (keyInfo.Key)
-                {
-                    case ConsoleKey.Enter:
-                        if (fileName.Length > 0)
+                return;
+            }
+            var keyInfo = Console.ReadKey(true);
+            switch (keyInfo.Key)
+            {
+                case ConsoleKey.Enter:
+                    if (fileName.Length > 0)
+                    {
+                        if (createAction != null)
                         {
-                            if (createAction != null)
-                            {
-                                createAction(fileName);
-                                refresh();
-                            }
-                            else if (renameAction != null)
-                            {
-                                renameAction(oldName, fileName);
-                                refresh();
-                            }
+                            createAction(fileName);
+                            refresh();
                         }
-                        windowState = WindowState.ToClose;
-                        break;
-                    case ConsoleKey.Escape:
-                        windowState = WindowState.ToClose;
-                        break;
-                    case ConsoleKey.Backspace:
-                        if (fileName.Length > 0)
+                        else if (renameAction != null)
                         {
-                            fileName = fileName.Substring(0, fileName.Length - 1);
+                            renameAction(oldName, fileName);
+                            refresh();
                         }
-                        break;
-                    default:
-                        if (keyInfo.KeyChar != '\0')
-                        {
-                            fileName += keyInfo.KeyChar;
-                        }
-                        break;
-                }
+                    }
+                    windowState = WindowState.ToClose;
+                    break;
+                case ConsoleKey.Escape:
+                    windowState = WindowState.ToClose;
+                    break;
+                case ConsoleKey.Backspace:
+                    if (fileName.Length > 0)
+                    {
+                        fileName = fileName.Substring(0, fileName.Length - 1);
+                    }
+                    break;
+                default:
+                    if (keyInfo.KeyChar != '\0')
+                    {
+                        fileName += keyInfo.KeyChar;
+                    }
+                    break;
             }
         }
 
         public override void HandleMouseInput()
         {
-            // Not implemented yet
+            // Not yet implemented
         }
 
         public override void Draw()
         {
-            int windowX = (canvas.Mode.Columns - windowWidth) / 2;
-            int windowY = (canvas.Mode.Rows - windowHeight) / 2;
-
-            canvas.DrawFilledRectangle(new Pen(Color.White), windowX, windowY, windowWidth, windowHeight);
-
-            canvas.DrawRectangle(new Pen(Color.Black), windowX, windowY, windowWidth, windowHeight);
-
-            canvas.DrawString("Nome do Arquivo/Pasta:", PCScreenFont.Default, new Pen(Color.Black), windowX + 10, windowY + 10);
-
-            canvas.DrawFilledRectangle(new Pen(Color.White), windowX + 10, windowY + 40, windowWidth - 20, 20);
-            canvas.DrawString(fileName, PCScreenFont.Default, new Pen(Color.Black), windowX + 10, windowY + 40);
+            int centerX = (canvas.Mode.Columns - windowWidth) / 2;
+            int centerY = (canvas.Mode.Rows - windowHeight) / 2;
+            // Background
+            canvas.DrawFilledRectangle(new Pen(Color.White), centerX, centerY, windowWidth, windowHeight);
+            // Border
+            canvas.DrawRectangle(new Pen(Color.Black), centerX, centerY, windowWidth, windowHeight);
+            // Title
+            canvas.DrawString("Nome do Arquivo/Pasta:", PCScreenFont.Default, new Pen(Color.Black), centerX + 10, centerY + 10);
+            // File name
+            canvas.DrawFilledRectangle(new Pen(Color.White), centerX + 10, centerY + 40, windowWidth - 20, 20);
+            // File name text
+            canvas.DrawString(fileName, PCScreenFont.Default, new Pen(Color.Black), centerX + 10, centerY + 40);
         }
 
         public override void Run()
         {
             Draw();
             HandleKeyPress();
+            HandleMouseInput();
         }
     }
 }
