@@ -20,6 +20,8 @@ namespace SentinelOS.GUI
         private readonly List<string> menuOptions;
         private bool showStartMenu = false;
         private int highlightedIndex = -1;
+        private DateTime lastClickTime;
+        private const int DebounceInterval = 200;
 
         public StartMenu(Canvas canvas)
         {
@@ -36,6 +38,7 @@ namespace SentinelOS.GUI
                         "Task Manager",
                         "Terminal",
                     };
+            lastClickTime = DateTime.MinValue;
         }
 
         public void HandleDrawStartMenu()
@@ -60,6 +63,7 @@ namespace SentinelOS.GUI
         {
             if (MouseManager.MouseState == MouseState.Left && MouseManager.X >= 0 && MouseManager.X <= 35 && MouseManager.Y >= 690 && MouseManager.Y <= 728)
             {
+                if (PreventDoubleClick()) return;
                 showStartMenu = !showStartMenu;
             }
 
@@ -73,11 +77,11 @@ namespace SentinelOS.GUI
                     MouseManager.Y >= startMenuY - menuOptions.Count * optionHeight + yOffset && MouseManager.Y <= startMenuY + yOffset)
                 {
                     int relativeY = startMenuY - (int)MouseManager.Y + yOffset;
-
                     highlightedIndex = relativeY / optionHeight;
 
                     if (MouseManager.MouseState == MouseState.Left && highlightedIndex >= 0 && highlightedIndex < menuOptions.Count)
                     {
+                        if (PreventDoubleClick()) return;
                         HandleMenuSelection(highlightedIndex);
                         showStartMenu = false;
                     }
@@ -87,6 +91,16 @@ namespace SentinelOS.GUI
                     highlightedIndex = -1;
                 }
             }
+        }
+
+        private bool PreventDoubleClick()
+        {
+            if ((DateTime.Now - lastClickTime).TotalMilliseconds < DebounceInterval)
+            {
+                return true;
+            }
+            lastClickTime = DateTime.Now;
+            return false;
         }
 
         private void HandleMenuSelection(int index)

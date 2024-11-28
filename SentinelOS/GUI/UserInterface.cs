@@ -27,6 +27,8 @@ namespace SentinelOS.GUI
         private int highlightedIndex = -1;
         private readonly StartMenu startMenu;
         private List<DirectoryEntry> desktopDirectoryEntries;
+        private DateTime lastClickTime;
+        private const int DebounceInterval = 200;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserInterface"/> class.
@@ -37,6 +39,7 @@ namespace SentinelOS.GUI
             this.startMenu = new StartMenu(canvas);
             WindowManager.Initialize();
             this.desktopDirectoryEntries = DirectoryManager.GetDirectoryEntries(Paths.Desktop);
+            lastClickTime = DateTime.MinValue;
         }
 
         public void DrawUserInterface()
@@ -62,6 +65,16 @@ namespace SentinelOS.GUI
             canvas.DrawImage(Resources.backgroundBitmap, 0, 0);
         }
 
+        private bool PreventDoubleClick()
+        {
+            if ((DateTime.Now - lastClickTime).TotalMilliseconds < DebounceInterval)
+            {
+                return true;
+            }
+            lastClickTime = DateTime.Now;
+            return false;
+        }
+
         public void HandleMouseInput()
         {
             if (MouseManager.MouseState == MouseState.Right && MouseManager.Y < 690) // Outside the taskbar
@@ -81,6 +94,7 @@ namespace SentinelOS.GUI
                 }
                 if(highlightedIndex != -1)
                 {
+                    if (PreventDoubleClick()) return;
                     HandleSysFileExecution();
                 }
                 showContextMenu = false;

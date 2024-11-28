@@ -7,8 +7,10 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
+using Cosmos.Core.IOGroup;
 using MouseManager = Cosmos.System.MouseManager;
 using MouseState = Cosmos.System.MouseState;
 
@@ -27,7 +29,7 @@ namespace SentinelOS.GUI.Windows
         public Explorer(Canvas canvas, int x, int y, int width, int height, string name)
             : base(canvas, x, y, width, height, name)
         {
-            return;
+            directoryContent = new List<DirectoryEntry>();
         }
 
         private void UpdateDirectoryContent()
@@ -70,7 +72,7 @@ namespace SentinelOS.GUI.Windows
         {
             HandleEssentialMouseInput();
 
-            if (MouseManager.MouseState == MouseState.Right)
+            if (MouseManager.MouseState == MouseState.Right && IsMouseOver(windowX, windowY, windowWidth, windowHeight))
             {
                 showContextMenu = true;
                 contextMenuX = (int)MouseManager.X;
@@ -79,6 +81,7 @@ namespace SentinelOS.GUI.Windows
 
             if (MouseManager.MouseState == MouseState.Left)
             {
+                if (PreventDoubleClick()) return;
                 int arrowX = windowX + BackArrowPadding;
                 int arrowY = windowY + 40;
                 if (IsMouseOver(arrowX, arrowY, BackArrowSize, BackArrowSize))
